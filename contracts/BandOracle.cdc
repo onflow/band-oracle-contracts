@@ -7,8 +7,13 @@ pub contract BandOracle {
     /// Paths
     ///
 
-    // Admin resource storage path
-    pub let BandOracleAdminStoragePath: StoragePath
+    // OracleAdmin resource paths
+    pub let OracleAdminStoragePath: StoragePath
+    pub let OracleAdminPrivatePath: PrivatePath
+
+    // Relay resource paths
+    pub let RelayStoragePath: StoragePath
+    pub let RelayPrivatePath: PrivatePath
 
     ///
     /// Contract level fields
@@ -17,12 +22,16 @@ pub contract BandOracle {
     // Mapping from symbol to data struct
     access(contract) let symbolsRefData: {String: RefData}
 
+    /// Set a string as base storage path for updater resources
+    pub let dataUpdaterStorageBasePath: String
+    pub let dataUpdaterPrivateBasePath: String
+
     ///
     /// Events
     ///
 
     //
-    pub event NewRelayerCreated()
+    pub event NewRelayCreated()
     
     //
     pub event RelayerAuthorised()
@@ -59,14 +68,15 @@ pub contract BandOracle {
 
     ///
     ///
-    pub resource RelayerAdministrator {
+    pub resource OracleAdmin {
 
-        // This would create new data updater resources and publish a capability to
-        // them to the account meant to create a Relay resource
+        pub fun createRefDataUpdater (): @RefDataUpdater {
+            return <- create RefDataUpdater()
+        }
 
         // It will also provide a mechanism to unlink that capability and delete the 
-        // associated updater resource in case a certain Relayer needs to be 
-        // unauthorized
+        // associated updater resource in case a certain Relayer needs to be unauthorized
+
 
     }
 
@@ -94,7 +104,7 @@ pub contract BandOracle {
         // Capability linked to the assigned updater resource
         access(self) let updaterCapability: Capability<&{DataUpdater}>
     
-        pub fun relay (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64){
+        pub fun relayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64){
 
         }
 
@@ -134,8 +144,14 @@ pub contract BandOracle {
     ///
     ///
     init() {
-        self.BandOracleAdminStoragePath = /storage/BandOracleAdmin
-        self.account.save(<- create RelayerAdministrator(), to: self.BandOracleAdminStoragePath)
+        self.OracleAdminStoragePath = /storage/BandOracleAdmin
+        self.OracleAdminPrivatePath = /private/BandOracleAdmin
+        self.RelayStoragePath = /storage/BandOracleRelay
+        self.RelayPrivatePath = /private/BandOracleRelay
+        self.dataUpdaterStorageBasePath = "RefDataUpdater"
+        self.dataUpdaterPrivateBasePath = "RefDataUpdater"
+        self.account.save(<- create OracleAdmin(), to: self.OracleAdminStoragePath)
+        self.account.link<&OracleAdmin>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
     }
 }
