@@ -1,6 +1,7 @@
 # Band Oracle Contract
-A smart contract for enabling the Band Protocol relay system to keep crypto and fiat
-currency prices updated #onFlow
+The Cadence smart contract(s) enabling Flow native integration of the Band Protocol oracle network. The oracle network will provide price updates for crypto, fiat and commodities financial data for consumption by Flow applications. 
+
+To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
 ## How it works?
 The contract keeps a record of symbols and it's related market data 
