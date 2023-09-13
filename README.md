@@ -4,9 +4,7 @@ The Cadence smart contract(s) enabling Flow native integration of the Band Proto
 To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
 ## How it works?
-The contract keeps a record of symbols and it's related market data 
-that can be updated only by authorized parties and that can be queried
-via script by any user of the Flow blockchain.
+The contract keeps a record of symbols and the corresponding financial price data for them. While financial data are only updated by authorized BandChain relayers, they can be queried via a script by any user or application on the Flow blockchain.
 
 ### Storing the data
 Market for each symbol is stored on a dictionary as a contract level field `access(contract) let symbolsRefData: {String: RefData}`. The `RefData` structs stores the following information: 
