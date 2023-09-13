@@ -18,7 +18,7 @@ Market for each symbol is stored on a dictionary as a contract level field `acce
         pub var requestID: UInt64
     }
 ```
-This struct allows users to know when was the latest rate received and the oracle to discard updates from any relayer that are not up to date. Keep in mind that all data is stored by its USD-rate, and calculated in any other currency based on that.
+This struct provides the caller with the data received from the oracle network for the symbol in question. Keep in mind that all data is normalized and stored using a USD conversion rate, meaning that conversions into other symbols will derive from that.
 
 ### Updating the data
 The account where the contract is deployed will be granted with a `OracleAdmin` resource. This resource could be use to create `DataUpdater` resources and publishing a `{&RelayUpdate}` capability to them. An authorized account can claim said capability at the time of creating a `Relay` resource. This resource will grant the ability to call the `updateData` method that will call contract function `access(contract) fun updateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64)` that will finally update the `symbolsRefData` dictionary.
