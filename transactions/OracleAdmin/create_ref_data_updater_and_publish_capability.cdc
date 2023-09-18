@@ -9,7 +9,8 @@ transaction(relayerAddress: Address) {
             acct.getCapability<&BandOracle.OracleAdmin>(BandOracle.OracleAdminPrivatePath)
         let oracleAdminRef = adminCap.borrow() 
             ?? panic("Can't borrow oracle admin resource")
-        let refDataUpdater <- oracleAdminRef.createRefDataUpdater()
+        let refDataUpdater <- 
+            oracleAdminRef.createRefDataUpdater(associatedRelayer: relayerAddress)
         let storagePathString = 
             BandOracle.dataUpdaterStorageBasePath.concat(refDataUpdater.uuid.toString())
         let refDataUpdaterStoragePath = 

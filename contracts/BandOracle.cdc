@@ -21,6 +21,7 @@ pub contract BandOracle {
     
     // Mapping from symbol to data struct
     access(contract) let symbolsRefData: {String: RefData}
+    access(contract) let relayersUpdaterIdentifier: {Address: UInt64}
 
     /// Set a string as base storage path for updater resources
     pub let dataUpdaterStorageBasePath: String
@@ -31,10 +32,10 @@ pub contract BandOracle {
     ///
 
     //
-    pub event NewRelayCreated()
+    pub event NewRefDataUpdaterCreated(entitledRelayer: Address, updaterID: UInt64)
     
     //
-    pub event RelayerAuthorised()
+    pub event NewRelayerAuthorized(linkedUpdaterID: UInt64)
     
     //
     pub event RelayerDismissed()
@@ -70,29 +71,32 @@ pub contract BandOracle {
     ///
     pub resource OracleAdmin {
 
-        pub fun createRefDataUpdater (): @RefDataUpdater {
-            return <- create RefDataUpdater()
+        pub fun createRefDataUpdater (entitledRelayer: Address): @RefDataUpdater {
+            let refDataUpdater <- create RefDataUpdater()
+            BandOracle.relayersUpdaterIdentifier[entitledRelayer] = refDataUpdater.uuid
+            emit NewRefDataUpdaterCreated(entitledRelayer: entitledRelayer, updaterID: refDataUpdater.uuid)
+            return <- refDataUpdater
         }
 
-        // It will also provide a mechanism to unlink that capability and delete the 
-        // associated updater resource in case a certain Relayer needs to be unauthorized
+        pub fun revokeRelayerPrivileges (relayerAccount: Address) {
 
 
+        }
     }
 
     ///
     ///
     pub resource interface DataUpdater {
-        pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+        pub fun updateData (symbolsRate: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64)
     }
 
     ///
     ///
     pub resource RefDataUpdater: DataUpdater {
-        pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+        pub fun updateData (symbolsRate: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64){
-            BandOracle.updateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
+            BandOracle.updateRefData(symbolsRate: symbolsRate, resolveTime: resolveTime, 
                                     requestID: requestID)
         }
     }    
@@ -110,6 +114,9 @@ pub contract BandOracle {
 
         init(updaterCapability: Capability<&{DataUpdater}>){
             self.updaterCapability = updaterCapability
+            let updaterRef = self.updaterCapability.borrow() 
+                ?? panic ("Can't borrow linked updater")
+            emit NewRelayerAuthorized(linkedUpdaterID: updaterRef.uuid)
         }
     }
 
@@ -119,7 +126,7 @@ pub contract BandOracle {
 
     ///
     ///
-    access(contract) fun updateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+    access(contract) fun updateRefData (symbolsRate: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
 
     }
 
@@ -153,5 +160,6 @@ pub contract BandOracle {
         self.account.save(<- create OracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&OracleAdmin>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
+        self.relayersUpdaterIdentifier = {}
     }
 }
