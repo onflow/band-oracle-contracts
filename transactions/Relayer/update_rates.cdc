@@ -4,13 +4,16 @@ transaction (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UIn
     let relayRef: &BandOracle.Relay
 
     prepare (acct: AuthAccount){
+        // Get a capability to the relayer resource
         let relayCapability = 
             acct.getCapability<&BandOracle.Relay>(BandOracle.RelayPrivatePath)
+        // And borrow a reference to it
         self.relayRef = relayCapability.borrow()
             ?? panic ("Cannot borrow reference to relay resource")
     }
 
     execute {
+        // Call the relayRates function exposed by the relayer resource
         self.relayRef.relayRates(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID)
     }
 }
