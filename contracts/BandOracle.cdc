@@ -16,35 +16,26 @@ pub contract BandOracle {
     pub let RelayPrivatePath: PrivatePath
 
     ///
-    /// Contract level fields
+    /// Fields
     ///
     
+    /// Set a string as base private path for data updater capabilities
+    pub let dataUpdaterPrivateBasePath: String
+
     // Mapping from symbol to data struct
     access(contract) let symbolsRefData: {String: RefData}
+    // Hay que ver como sabemos que relay desconectar
     access(contract) let relayersUpdaterIdentifier: {Address: UInt64}
-
-    /// Set a string as base storage path for updater resources
-    pub let dataUpdaterStorageBasePath: String
-    pub let dataUpdaterPrivateBasePath: String
 
     ///
     /// Events
     ///
-
-    //
-    pub event NewRefDataUpdaterCreated(entitledRelayer: Address, updaterID: UInt64)
-    
-    //
-    pub event NewRelayerAuthorized(linkedUpdaterID: UInt64)
-    
-    //
-    pub event RelayerDismissed()
     
     //
     pub event RefDataUpdated()
 
     ///
-    /// Data Structs
+    /// Structs
     /// 
     
     //
@@ -69,37 +60,47 @@ pub contract BandOracle {
 
     ///
     ///
-    pub resource OracleAdmin {
-
-        pub fun createRefDataUpdater (entitledRelayer: Address): @RefDataUpdater {
-            let refDataUpdater <- create RefDataUpdater()
-            BandOracle.relayersUpdaterIdentifier[entitledRelayer] = refDataUpdater.uuid
-            emit NewRefDataUpdaterCreated(entitledRelayer: entitledRelayer, updaterID: refDataUpdater.uuid)
-            return <- refDataUpdater
-        }
-
-        pub fun revokeRelayerPrivileges (relayerAccount: Address) {
-
-
-        }
-    }
-
-    ///
-    ///
     pub resource interface DataUpdater {
         pub fun updateData (symbolsRate: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64)
     }
+    ///
+    ///
+    pub resource OracleAdmin: DataUpdater {
 
-    ///
-    ///
-    pub resource RefDataUpdater: DataUpdater {
+/*
+        // mierda puta esto hay que cambiarlo x algo que publique la capability?
+        pub fun authorizeRelayer (authorizedRelayer: Address): Capability<&{DataUpdater}> {
+
+
+
+
+
+
+
+
+
+            BandOracle.relayersUpdaterIdentifier[entitledRelayer] = refDataUpdater.uuid
+            emit NewRefDataUpdaterCreated(entitledRelayer: entitledRelayer, updaterID: refDataUpdater.uuid)
+
+            return dataUpdaterCapability
+        }
+*/
+        pub fun revokeRelayer (revokedRelayer: Address) {
+
+
+        }
+
+        //maybe we can have a field holding the entitled relayers
+        // maybe even authorising / revoking leaves here rather than on the admin?
+        // maybe this is da admin
         pub fun updateData (symbolsRate: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64){
             BandOracle.updateRefData(symbolsRate: symbolsRate, resolveTime: resolveTime, 
                                     requestID: requestID)
         }
-    }    
+
+    }
 
     ///
     ///
@@ -116,18 +117,29 @@ pub contract BandOracle {
             self.updaterCapability = updaterCapability
             let updaterRef = self.updaterCapability.borrow() 
                 ?? panic ("Can't borrow linked updater")
-            emit NewRelayerAuthorized(linkedUpdaterID: updaterRef.uuid)
         }
     }
 
     ///
-    /// Contract functions
+    /// Functions
     ///
 
     ///
     ///
     access(contract) fun updateRefData (symbolsRate: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+        // Modify contract level field dictionary that stores rates
+    }
 
+    ///
+    ///
+    access(contract) fun forceUpdateRefData (symbolsRate: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+        // Modify contract level field dictionary that stores rates even if resolveTime is older
+    }
+
+    ///
+    ///
+    access(contract) fun removeSymbol (symbol: String){
+        // Delete symbol entry on the contract dictionary
     }
 
     ///
@@ -139,7 +151,7 @@ pub contract BandOracle {
     ///
     ///
     pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData?{
-        return self.symbolsRefData[baseSymbol]
+        return nil
     }
 
     ///
@@ -155,8 +167,7 @@ pub contract BandOracle {
         self.OracleAdminPrivatePath = /private/BandOracleAdmin
         self.RelayStoragePath = /storage/BandOracleRelay
         self.RelayPrivatePath = /private/BandOracleRelay
-        self.dataUpdaterStorageBasePath = "RefDataUpdater"
-        self.dataUpdaterPrivateBasePath = "RefDataUpdater"
+        self.dataUpdaterPrivateBasePath = "DataUpdater"
         self.account.save(<- create OracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&OracleAdmin>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
