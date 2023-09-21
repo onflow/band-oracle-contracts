@@ -5,7 +5,7 @@ transaction (oracleAdmin: Address) {
         // Try to claim the published updater capability 
         let updaterCapability = 
             acct.inbox.claim<&{BandOracle.DataUpdater}>(
-                BandOracle.dataUpdaterPrivateBasePath.concat(acct.address.toString()),
+                BandOracle.getUpdaterCapabilityNameFromAddress (relayer: acct.address),
                 provider: oracleAdmin
             )
             ?? panic ("Cannot claim data updater capability")

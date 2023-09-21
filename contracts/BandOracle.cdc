@@ -20,19 +20,17 @@ pub contract BandOracle {
     ///
     
     /// Set a string as base private path for data updater capabilities
-    pub let dataUpdaterPrivateBasePath: String
+    access(contract) let dataUpdaterPrivateBasePath: String
 
     // Mapping from symbol to data struct
     access(contract) let symbolsRefData: {String: RefData}
-    // Hay que ver como sabemos que relay desconectar
-    access(contract) let relayersUpdaterIdentifier: {Address: UInt64}
 
     ///
     /// Events
     ///
     
     //
-    pub event RefDataUpdated()
+    pub event RefDataUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
 
     ///
     /// Structs
@@ -61,45 +59,46 @@ pub contract BandOracle {
     ///
     ///
     pub resource interface DataUpdater {
-        pub fun updateData (symbolsRate: {String: UInt64}, resolveTime: UInt64, 
+        pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+                            requestID: UInt64)
+        pub fun forceUpdateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64)
     }
+
     ///
     ///
     pub resource OracleAdmin: DataUpdater {
 
-/*
-        // mierda puta esto hay que cambiarlo x algo que publique la capability?
-        pub fun authorizeRelayer (authorizedRelayer: Address): Capability<&{DataUpdater}> {
-
-
-
-
-
-
-
-
-
-            BandOracle.relayersUpdaterIdentifier[entitledRelayer] = refDataUpdater.uuid
-            emit NewRefDataUpdaterCreated(entitledRelayer: entitledRelayer, updaterID: refDataUpdater.uuid)
-
-            return dataUpdaterCapability
+        ///
+        /// Auxiliary method to ensure that the formation of the capability path that 
+        /// identifies relayers is done in a uniform way
+        ///
+        pub fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath {
+            // Create the string that will form the private path concatenating the base
+            // path and the relayer identifying address
+            let privatePathString = 
+                BandOracle.getUpdaterCapabilityNameFromAddress(relayer: relayer)
+            // Attempt to create the private path using the identifier
+            let dataUpdaterPrivatePath = 
+                PrivatePath(identifier: privatePathString) 
+                ?? panic("Error while creating data updater capability private path")
+            return dataUpdaterPrivatePath
         }
-*/
-        pub fun revokeRelayer (revokedRelayer: Address) {
-
-
-        }
-
-        //maybe we can have a field holding the entitled relayers
-        // maybe even authorising / revoking leaves here rather than on the admin?
-        // maybe this is da admin
-        pub fun updateData (symbolsRate: {String: UInt64}, resolveTime: UInt64, 
-                            requestID: UInt64){
-            BandOracle.updateRefData(symbolsRate: symbolsRate, resolveTime: resolveTime, 
+        
+        // OracleAdmin and entitled relayers can call this method to update rates
+        pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+                            requestID: UInt64) {
+            BandOracle.updateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
                                     requestID: requestID)
         }
 
+        // OracleAdmin and entitled relayers can call this method to force update rates
+        pub fun forceUpdateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+                            requestID: UInt64) {
+            BandOracle.forceUpdateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
+                                    requestID: requestID)
+        }
+        
     }
 
     ///
@@ -109,11 +108,21 @@ pub contract BandOracle {
         // Capability linked to the assigned updater resource
         access(self) let updaterCapability: Capability<&{DataUpdater}>
     
-        pub fun relayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64){
-
+        pub fun relayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+            let updaterRef = self.updaterCapability.borrow() 
+                ?? panic ("Can't borrow reference to data updater while processing request ".concat(requestID.toString()))
+            updaterRef.updateData(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID)
+            emit RefDataUpdated(symbols: symbolsRates.keys, relayerID: self.uuid, requestID: requestID)
         }
 
-        init(updaterCapability: Capability<&{DataUpdater}>){
+        pub fun forceRelayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+            let updaterRef = self.updaterCapability.borrow() 
+                ?? panic ("Can't borrow reference to data updater while processing request ".concat(requestID.toString()))
+
+            emit RefDataUpdated(symbols: symbolsRates.keys, relayerID: self.uuid, requestID: requestID)
+        }
+
+        init(updaterCapability: Capability<&{DataUpdater}>) {
             self.updaterCapability = updaterCapability
             let updaterRef = self.updaterCapability.borrow() 
                 ?? panic ("Can't borrow linked updater")
@@ -126,31 +135,32 @@ pub contract BandOracle {
 
     ///
     ///
-    access(contract) fun updateRefData (symbolsRate: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+    access(contract) fun updateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
         // Modify contract level field dictionary that stores rates
+        
     }
 
     ///
     ///
-    access(contract) fun forceUpdateRefData (symbolsRate: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+    access(contract) fun forceUpdateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
         // Modify contract level field dictionary that stores rates even if resolveTime is older
     }
 
     ///
     ///
-    access(contract) fun removeSymbol (symbol: String){
+    access(contract) fun removeSymbol (symbol: String) {
         // Delete symbol entry on the contract dictionary
     }
 
     ///
     ///
-    access(contract) fun _getRefData (symbol: String): RefData?{
-        return self.symbolsRefData[symbol]
+    access(contract) fun _getRefData (symbol: String): RefData? {
+        return self.symbolsRefData[symbol] ?? nil
     }
 
     ///
     ///
-    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData?{
+    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData? {
         return nil
     }
 
@@ -158,6 +168,19 @@ pub contract BandOracle {
     ///
     pub fun createRelay (updaterCapability: Capability<&{DataUpdater}>): @Relay {
         return <- create Relay(updaterCapability: updaterCapability)
+    }
+
+    ///
+    /// Auxiliary method to ensure that the formation of the capability name that 
+    /// identifies data updater capability for relayers is done in a uniform way
+    /// by both admin and relayers
+    ///
+    pub fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
+        // Create the string that will form the private path concatenating the base
+        // path and the relayer identifying address
+        let capabilityName = 
+            BandOracle.dataUpdaterPrivateBasePath.concat(relayer.toString())
+        return capabilityName
     }
 
     ///
@@ -171,6 +194,5 @@ pub contract BandOracle {
         self.account.save(<- create OracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&OracleAdmin>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
-        self.relayersUpdaterIdentifier = {}
     }
 }

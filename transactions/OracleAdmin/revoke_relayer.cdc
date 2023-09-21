@@ -1,14 +1,10 @@
 import BandOracle from "./../../contracts/BandOracle.cdc"
 
-transaction(relayerAddress: Address) {
+transaction(relayer: Address) {
     prepare(acct: AuthAccount){
-        // Recreate the private path for the updater capability using relayer address
-        let privatePathString = 
-            BandOracle.dataUpdaterPrivateBasePath.concat(relayerAddress.toString())
-        let dataUpdaterPrivatePath = 
-            PrivatePath(identifier: privatePathString) 
-            ?? panic("Error while creating data updater capability private path")
+        let oracleAdminRef = acct.borrow<&BandOracle.OracleAdmin>(from: BandOracle.OracleAdminStoragePath)
+            ?? panic("Can't borrow a reference to the Oracle Admin")
         // Unlink capability linked for that relayer address      
-        acct.unlink(dataUpdaterPrivatePath)
+        acct.unlink(oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: relayer))
     }
 }
