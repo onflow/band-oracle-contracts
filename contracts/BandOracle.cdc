@@ -136,20 +136,34 @@ pub contract BandOracle {
     ///
     ///
     access(contract) fun updateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
-        // Modify contract level field dictionary that stores rates
-        
+        // For each symbol rate relayed
+        for symbol in symbolsRates.keys {
+            // If the symbol hasn't stored rates yet, or the stored records are older
+            // than the new relayed rates
+            if (BandOracle.symbolsRefData[symbol] == nil ) ||
+                (BandOracle.symbolsRefData[symbol]!.timestamp < resolveTime) {
+                // Store the relayed rate
+                BandOracle.symbolsRefData[symbol] = 
+                    RefData(rate: symbolsRates[symbol]!, timestamp: resolveTime, requestID: requestID)
+            }
+        }
     }
 
     ///
     ///
     access(contract) fun forceUpdateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
-        // Modify contract level field dictionary that stores rates even if resolveTime is older
+        // For each symbol rate relayed, store it no matter what was the previous
+        // records for it
+        for symbol in symbolsRates.keys {
+            BandOracle.symbolsRefData[symbol] = 
+                RefData(rate: symbolsRates[symbol]!, timestamp: resolveTime, requestID: requestID)
+        }
     }
 
     ///
     ///
     access(contract) fun removeSymbol (symbol: String) {
-        // Delete symbol entry on the contract dictionary
+        BandOracle.symbolsRefData[symbol] = nil
     }
 
     ///
@@ -161,6 +175,8 @@ pub contract BandOracle {
     ///
     ///
     pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData? {
+        
+
         return nil
     }
 
