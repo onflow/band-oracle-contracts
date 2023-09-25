@@ -54,14 +54,17 @@ pub contract BandOracle {
 
     // Struct for returning data
     pub struct ReferenceData {
-        // USD-rate, multiplied by 1e9.
-        pub var rate: UFix64
-        // UNIX epoch when data is last resolved. 
-        pub var timestamp: UFix64
+        // 
+        pub var rate: UInt256
+        // UNIX epoch when base data is last resolved. 
+        pub var baseTimestamp: UInt64
+        // UNIX epoch when quote data is last resolved. 
+        pub var quoteTimestamp: UInt64
 
-        init(rate: UFix64, timestamp: UFix64) {
+        init(rate: UInt256, baseTimestamp: UInt64, quoteTimestamp: UInt64) {
             self.rate = rate
-            self.timestamp = timestamp
+            self.baseTimestamp = baseTimestamp
+            self.quoteTimestamp = quoteTimestamp
         }
     }
 
@@ -196,13 +199,14 @@ pub contract BandOracle {
 
         let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
         let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
-        let backToDecimalFactor: UInt64 = 1000000000000000000
+        let backToDecimalFactor: UInt256 = 1000000000000000000
         if (baseRefData == nil || quoteRefData == nil) {
             return nil
         } else {
-            let rate = UFix64(baseRefData!.rate / quoteRefData!.rate * backToDecimalFactor) 
+            let rate = UInt256((UInt256(baseRefData!.rate) * backToDecimalFactor) / UInt256(quoteRefData!.rate)) 
             return ReferenceData (rate: rate, 
-                            timestamp: UFix64(baseRefData!.timestamp))
+                            baseTimestamp: baseRefData!.timestamp,
+                            quoteTimestamp: quoteRefData!.timestamp)
         }
         
     }
