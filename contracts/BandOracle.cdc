@@ -36,7 +36,7 @@ pub contract BandOracle {
     /// Structs
     /// 
     
-    //
+    // Struct for storing data
     pub struct RefData {
         // USD-rate, multiplied by 1e9.
         pub var rate: UInt64
@@ -51,6 +51,20 @@ pub contract BandOracle {
             self.requestID = requestID
         }
     }
+
+    // Struct for returning data
+    pub struct ReferenceData {
+        // USD-rate, multiplied by 1e9.
+        pub var rate: UFix64
+        // UNIX epoch when data is last resolved. 
+        pub var timestamp: UFix64
+
+        init(rate: UFix64, timestamp: UFix64) {
+            self.rate = rate
+            self.timestamp = timestamp
+        }
+    }
+
 
     ///
     /// Resources
@@ -170,7 +184,7 @@ pub contract BandOracle {
     ///
     access(contract) fun _getRefData (symbol: String): RefData? {
         if (symbol == "USD") {
-            return RefData(rate: 1000000000, timestamp: getCurrentBlock().timestamp, requestID: 0)
+            return RefData(rate: 1000000000, timestamp: UInt64(getCurrentBlock().timestamp), requestID: 0)
         } else {
             return self.symbolsRefData[symbol] ?? nil
         }
@@ -178,7 +192,7 @@ pub contract BandOracle {
 
     ///
     ///
-    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData? {
+    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): ReferenceData? {
 
         let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
         let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
@@ -186,10 +200,9 @@ pub contract BandOracle {
         if (baseRefData == nil || quoteRefData == nil) {
             return nil
         } else {
-            let rate = baseRefData!.rate / quoteRefData!.rate * backToDecimalFactor 
-            return RefData (rate: rate, 
-                            timestamp: baseRefData!.timestamp, 
-                            requestID: baseRefData!.requestID)
+            let rate = UFix64(baseRefData!.rate / quoteRefData!.rate * backToDecimalFactor) 
+            return ReferenceData (rate: rate, 
+                            timestamp: UFix64(baseRefData!.timestamp))
         }
         
     }
