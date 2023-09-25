@@ -169,15 +169,29 @@ pub contract BandOracle {
     ///
     ///
     access(contract) fun _getRefData (symbol: String): RefData? {
-        return self.symbolsRefData[symbol] ?? nil
+        if (symbol == "USD") {
+            return RefData(rate: 1000000000, timestamp: getCurrentBlock().timestamp, requestID: 0)
+        } else {
+            return self.symbolsRefData[symbol] ?? nil
+        }
     }
 
     ///
     ///
     pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData? {
-        
 
-        return nil
+        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
+        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
+        let backToDecimalFactor: UInt64 = 1000000000000000000
+        if (baseRefData == nil || quoteRefData == nil) {
+            return nil
+        } else {
+            let rate = baseRefData!.rate / quoteRefData!.rate * backToDecimalFactor 
+            return RefData (rate: rate, 
+                            timestamp: baseRefData!.timestamp, 
+                            requestID: baseRefData!.requestID)
+        }
+        
     }
 
     ///
