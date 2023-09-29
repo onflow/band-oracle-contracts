@@ -1,12 +1,6 @@
 {
 	"contracts": {
-		"BandOracle": {
-			"source": "./contracts/BandOracle.cdc",
-			"aliases": {
-				"emulator": "f8d6e0586b0a20c7",
-				"testnet": "67ac3cbabfa6ee04"
-			}
-		}
+		"BandOracle": "contracts/BandOracle.cdc"
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
@@ -14,29 +8,22 @@
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
+		"default": {
+			"address": "f669cb8d41ce0c74",
+			"key": "83c4da8100a5bb0086fd0835e0b48dbdf507ca4aa15dab56edccee06c82eb110"
+		},
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
-			"key": {
-				"type": "file",
-				"location": "./.keys/emulator-account.pkey"
-			}
+			"key": "83c4da8100a5bb0086fd0835e0b48dbdf507ca4aa15dab56edccee06c82eb110"
 		},
-		"testnet-oracle": {
-			"address": "67ac3cbabfa6ee04",
-			"key": {
-				"type": "file",
-				"location": "./.keys/testnet-oracle.pkey"
-			}
+		"emulator-relayer": {
+			"address": "fd43f9148d4b725d",
+			"key": "62d42730fe8c363ce6518242ef38c001ce1f8972be6c6b37c97e0aa23bcaa0e8"
 		}
 	},
 	"deployments": {
 		"emulator": {
-			"emulator-account": [
-				"BandOracle"
-			]
-		},
-		"testnet": {
-			"testnet-oracle": [
+			"default": [
 				"BandOracle"
 			]
 		}
