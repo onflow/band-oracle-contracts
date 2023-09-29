@@ -19,11 +19,30 @@
 		"emulator-relayer": {
 			"address": "fd43f9148d4b725d",
 			"key": "2b42bf501bb3e07e9332b0cda9e68c18d0591cdc54aa701fb111991adf1a99fe"
+		},
+		"testnet-oracle": {
+			"address": "4772ee0aba864de9",
+			"key": {
+				"type": "file",
+				"location": "testnet-oracle.pkey"
+			}
+		},
+		"testnet-relayer": {
+			"address": "51268b3923824788",
+			"key": {
+				"type": "file",
+				"location": "testnet-relayer.pkey"
+			}
 		}
 	},
 	"deployments": {
 		"emulator": {
 			"default": [
+				"BandOracle"
+			]
+		},
+		"testnet": {
+			"testnet-oracle": [
 				"BandOracle"
 			]
 		}
