@@ -19,33 +19,33 @@
 - flow transactions send ./transactions/Relayer/create_new_relay.cdc 0xf669cb8d41ce0c74 --signer emulator-relayer
 
 #### Build sign and send rates update transaction 1
-- flow transactions build ./transactions/Relayer/relay_rates.cdc --args-json "$(cat ./transactions/Relayer/new_rates_1.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/new_rates_1.rlp
-- flow transactions sign ./transactions/Relayer/new_rates_1.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/new_rates_1_signed.rlp
-- flow transactions send-signed ./transactions/Relayer/new_rates_1_signed.rlp
+- flow transactions build ./transactions/Relayer/relay_rates.cdc --args-json "$(cat ./transactions/Relayer/tx_scaffold/new_rates_1.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/new_rates_1.rlp
+- flow transactions sign ./transactions/Relayer/tx_scaffold/new_rates_1.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/new_rates_1_signed.rlp
+- flow transactions send-signed ./transactions/Relayer/tx_scaffold/new_rates_1_signed.rlp
 
 #### Run get rates script
 - flow scripts execute ./scripts/get_rates.cdc "BTC" "FLOW"
 
 #### Build sign and send rates update transaction 2
-- flow transactions build ./transactions/Relayer/relay_rates.cdc --args-json "$(cat ./transactions/Relayer/new_rates_2.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/new_rates_2.rlp
-- flow transactions sign ./transactions/Relayer/new_rates_2.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/new_rates_2_signed.rlp
-- flow transactions send-signed ./transactions/Relayer/new_rates_2_signed.rlp
+- flow transactions build ./transactions/Relayer/relay_rates.cdc --args-json "$(cat ./transactions/Relayer/tx_scaffold/new_rates_2.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/new_rates_2.rlp
+- flow transactions sign ./transactions/Relayer/tx_scaffold/new_rates_2.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/new_rates_2_signed.rlp
+- flow transactions send-signed ./transactions/Relayer/tx_scaffold/new_rates_2_signed.rlp
 
 #### Run get rates script
 - flow scripts execute ./scripts/get_rates.cdc "BTC" "FLOW"
 
 #### Build sign and send rates update transaction 3
-- flow transactions build ./transactions/Relayer/relay_rates.cdc --args-json "$(cat ./transactions/Relayer/new_rates_3.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/new_rates_3.rlp
-- flow transactions sign ./transactions/Relayer/new_rates_3.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/new_rates_3_signed.rlp
-- flow transactions send-signed ./transactions/Relayer/new_rates_3_signed.rlp
+- flow transactions build ./transactions/Relayer/relay_rates.cdc --args-json "$(cat ./transactions/Relayer/tx_scaffold/new_rates_3.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/new_rates_3.rlp
+- flow transactions sign ./transactions/Relayer/tx_scaffold/new_rates_3.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/new_rates_3_signed.rlp
+- flow transactions send-signed ./transactions/Relayer/tx_scaffold/new_rates_3_signed.rlp
 
 #### Run get rates script
 - flow scripts execute ./scripts/get_rates.cdc "BTC" "FLOW"
 
 #### Build sign and send force update transaction
-- flow transactions build ./transactions/Relayer/force_relay_rates.cdc --args-json "$(cat ./transactions/Relayer/new_rates_3.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/force_new_rates.rlp
-- flow transactions sign ./transactions/Relayer/force_new_rates.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/force_new_rates_signed.rlp
-- flow transactions send-signed ./transactions/Relayer/force_new_rates_signed.rlp
+- flow transactions build ./transactions/Relayer/force_relay_rates.cdc --args-json "$(cat ./transactions/Relayer/tx_scaffold/new_rates_3.json)"  --proposer emulator-relayer --payer emulator-relayer --authorizer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/force_new_rates.rlp
+- flow transactions sign ./transactions/Relayer/tx_scaffold/force_new_rates.rlp --signer emulator-relayer --filter payload --save ./transactions/Relayer/tx_scaffold/force_new_rates_signed.rlp
+- flow transactions send-signed ./transactions/Relayer/tx_scaffold/force_new_rates_signed.rlp
 
 #### Run get rates script
 - flow scripts execute ./scripts/get_rates.cdc "BTC" "FLOW"
