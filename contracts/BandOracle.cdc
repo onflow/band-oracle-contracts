@@ -30,7 +30,7 @@ pub contract BandOracle {
     ///
     
     // Emitted by a relayer when it updates a set of symbols
-    pub event RefDataUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
+    pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
 
     ///
     /// Structs
@@ -168,7 +168,7 @@ pub contract BandOracle {
                 updatedSymbols.append(symbol)
             }
         }
-        emit RefDataUpdated(symbols: updatedSymbols, relayerID: relayerID, requestID: requestID)
+        emit BandOracleSymbolsUpdated(symbols: updatedSymbols, relayerID: relayerID, requestID: requestID)
     }
 
     ///
@@ -180,7 +180,7 @@ pub contract BandOracle {
             BandOracle.symbolsRefData[symbol] = 
                 RefData(rate: symbolsRates[symbol]!, timestamp: resolveTime, requestID: requestID)
         }
-        emit RefDataUpdated(symbols: symbolsRates.keys, relayerID: relayerID, requestID: requestID)
+        emit BandOracleSymbolsUpdated(symbols: symbolsRates.keys, relayerID: relayerID, requestID: requestID)
     }
 
     ///
