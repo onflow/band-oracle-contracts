@@ -1,37 +1,6 @@
 {
 	"contracts": {
-		"FungibleToken": {
-			"source": "./contracts/utility/FungibleToken.cdc",
-			"aliases": {
-				"emulator": "0xee82856bf20e2aa6",
-				"mainnet": "0xf233dcee88fe0abe",
-				"testnet": "0x9a0766d93b6608b7"
-			}
-		},
-		"NonFungibleToken": {
-			"source": "./contracts/utility/NonFungibleToken.cdc",
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"mainnet": "0x1d7e57aa55817448",
-				"testnet": "0x631e88ae7f1d7c20"
-			}
-		},
-		"MetadataViews": {
-			"source": "./contracts/utility/MetadataViews.cdc",
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"mainnet": "0x1d7e57aa55817448",
-				"testnet": "0x631e88ae7f1d7c20"
-			}
-		},
-		"FungibleTokenMetadataViews": {
-			"source": "./contracts/utility/FungibleTokenMetadataViews.cdc",
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"mainnet": "0xf233dcee88fe0abe",
-				"testnet": "0x9a0766d93b6608b7"
-			}
-		}
+		"BandOracle": "contracts/BandOracle.cdc"
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
@@ -39,17 +8,42 @@
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
+		"default": {
+			"address": "f669cb8d41ce0c74",
+			"key": "83c4da8100a5bb0086fd0835e0b48dbdf507ca4aa15dab56edccee06c82eb110"
+		},
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
-			"key": "$EMULATOR_ACCOUNT"
+			"key": "83c4da8100a5bb0086fd0835e0b48dbdf507ca4aa15dab56edccee06c82eb110"
+		},
+		"emulator-relayer": {
+			"address": "fd43f9148d4b725d",
+			"key": "2b42bf501bb3e07e9332b0cda9e68c18d0591cdc54aa701fb111991adf1a99fe"
+		},
+		"testnet-oracle": {
+			"address": "4772ee0aba864de9",
+			"key": {
+				"type": "file",
+				"location": "testnet-oracle.pkey"
+			}
+		},
+		"testnet-relayer": {
+			"address": "51268b3923824788",
+			"key": {
+				"type": "file",
+				"location": "testnet-relayer.pkey"
+			}
 		}
 	},
 	"deployments": {
 		"emulator": {
-			"emulator-account": [
-				"NonFungibleToken",
-				"MetadataViews",
-				"FungibleTokenMetadataViews"
+			"default": [
+				"BandOracle"
+			]
+		},
+		"testnet": {
+			"testnet-oracle": [
+				"BandOracle"
 			]
 		}
 	}

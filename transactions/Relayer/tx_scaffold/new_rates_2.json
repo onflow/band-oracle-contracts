@@ -1,0 +1,32 @@
+[
+    {
+        "type": "Dictionary", 
+        "value": [
+                    {
+                        "key": {
+                            "type": "String", 
+                            "value": "BTC"
+                        }, 
+                        "value": {
+                            "type": "UInt64", 
+                            "value": "60000000000000"}
+                    }, 
+                    {   
+                        "key": {
+                            "type": "String", 
+                            "value": "FLOW"},
+                        "value": {
+                            "type": "UInt64", 
+                            "value": "5000000000"}
+                    }
+        ]
+    },
+    {
+        "type": "UInt64",
+        "value": "1000"
+    },
+    {
+        "type": "UInt64",
+        "value": "1"
+    }
+]
