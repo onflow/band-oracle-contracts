@@ -25,6 +25,9 @@ pub contract BandOracle {
     // Mapping from symbol to data struct
     access(contract) let symbolsRefData: {String: RefData}
 
+    // 
+    pub let e18: UInt256
+
     ///
     /// Events
     ///
@@ -55,14 +58,16 @@ pub contract BandOracle {
     // Struct for consuming market data
     pub struct ReferenceData {
         // Base / quote symbols rate
-        pub var rate: UInt256
+        pub var integerE18Rate: UInt256
+        pub var fixedPointRate: UFix64
         // UNIX epoch when base data is last resolved. 
         pub var baseTimestamp: UInt64
         // UNIX epoch when quote data is last resolved. 
         pub var quoteTimestamp: UInt64
 
         init(rate: UInt256, baseTimestamp: UInt64, quoteTimestamp: UInt64) {
-            self.rate = rate
+            self.integerE18Rate = rate
+            self.fixedPointRate = UFix64(rate) / UFix64(BandOracle.e18)
             self.baseTimestamp = baseTimestamp
             self.quoteTimestamp = quoteTimestamp
         }
@@ -186,7 +191,7 @@ pub contract BandOracle {
     ///
     ///
     access(contract) fun removeSymbol (symbol: String) {
-        BandOracle.symbolsRefData[symbol] = nil
+        BandOracle.symbolsRefData.remove(key: symbol)
     }
 
     ///
@@ -204,11 +209,10 @@ pub contract BandOracle {
     pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): ReferenceData? {
         let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
         let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
-        let backToDecimalFactor: UInt256 = 1000000000000000000
         if (baseRefData == nil || quoteRefData == nil) {
             return nil
         } else {
-            let rate = UInt256((UInt256(baseRefData!.rate) * backToDecimalFactor) / UInt256(quoteRefData!.rate)) 
+            let rate = UInt256((UInt256(baseRefData!.rate) * BandOracle.e18) / UInt256(quoteRefData!.rate)) 
             return ReferenceData (rate: rate, 
                             baseTimestamp: baseRefData!.timestamp,
                             quoteTimestamp: quoteRefData!.timestamp)
@@ -246,6 +250,7 @@ pub contract BandOracle {
         self.account.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
+        self.e18 = 1000000000000000000
         // Create a relayer on the admin account so the relay methods are never accessed directly.
         // The admin could decide to build a transaction borrowing the whole BandOracleAdmin
         // resource and call updateData methods bypassing relayData methods but we are explicitly
