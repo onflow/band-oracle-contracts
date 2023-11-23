@@ -1,3 +1,6 @@
+import "FungibleToken"
+import "FlowToken"
+
 ///
 /// Contract that stores oracle prices allowing oracle to update them
 ///
@@ -15,6 +18,10 @@ pub contract BandOracle {
     pub let RelayStoragePath: StoragePath
     pub let RelayPrivatePath: PrivatePath
 
+    // FeeCollector resource paths
+    pub let FeeCollectorStoragePath: StoragePath
+
+
     ///
     /// Fields
     ///
@@ -25,15 +32,22 @@ pub contract BandOracle {
     // Mapping from symbol to data struct
     access(contract) let symbolsRefData: {String: RefData}
 
-    // 
+    // Aux constant for holding the 10^18 value
     pub let e18: UInt256
+    // Aux constant for holding the 10^18 value
+    pub let e9: UInt64
+
+    // Fees management
+    access(contract) let payments: @FungibleToken.Vault
+    access(contract) var fee: UFix64
 
     ///
     /// Events
     ///
     
-    // Emitted by a relayer when it updates a set of symbols
+    // Emitted when a relayer updates a set of symbols
     pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
+
 
     ///
     /// Structs
@@ -80,6 +94,8 @@ pub contract BandOracle {
 
     pub resource interface OracleAdmin {
         pub fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath
+        pub fun removeSymbol (symbol: String)
+        pub fun createNewFeeCollector (): @BandOracle.FeeCollector
     }
 
     ///
@@ -110,6 +126,13 @@ pub contract BandOracle {
                 ?? panic("Error while creating data updater capability private path")
             return dataUpdaterPrivatePath
         }
+
+        ///
+        ///
+        ///
+        pub fun removeSymbol (symbol: String) {
+            BandOracle.removeSymbol(symbol: symbol)
+        }
         
         // OracleAdmin and entitled relayers can call this method to update rates
         pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
@@ -123,6 +146,10 @@ pub contract BandOracle {
                                 requestID: UInt64, relayerID: UInt64) {
             BandOracle.forceUpdateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
                                     requestID: requestID, relayerID: relayerID)
+        }
+
+        pub fun createNewFeeCollector (): @FeeCollector {
+            return <- create FeeCollector()
         }
         
     }
@@ -153,10 +180,25 @@ pub contract BandOracle {
         }
     }
 
+    pub resource FeeCollector {
+
+        pub fun setFee (fee: UFix64) {
+            BandOracle.setFee(fee: fee)
+        }
+
+        pub fun collectFees (): @FungibleToken.Vault {
+            return <- BandOracle.collectFees()
+        }
+
+    }
+
     ///
     /// Functions
     ///
 
+    /// Aux access(contract) functions
+
+    ///
     ///
     ///
     access(contract) fun updateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64) {
@@ -178,6 +220,7 @@ pub contract BandOracle {
 
     ///
     ///
+    ///
     access(contract) fun forceUpdateRefData (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64) {
         // For each symbol rate relayed, store it no matter what was the previous
         // records for it
@@ -190,15 +233,17 @@ pub contract BandOracle {
 
     ///
     ///
+    ///
     access(contract) fun removeSymbol (symbol: String) {
         BandOracle.symbolsRefData.remove(key: symbol)
     }
 
     ///
     ///
+    ///
     access(contract) fun _getRefData (symbol: String): RefData? {
         if (symbol == "USD") {
-            return RefData(rate: 1000000000, timestamp: UInt64(getCurrentBlock().timestamp), requestID: 0)
+            return RefData(rate: BandOracle.e9, timestamp: UInt64(getCurrentBlock().timestamp), requestID: 0)
         } else {
             return self.symbolsRefData[symbol] ?? nil
         }
@@ -206,20 +251,48 @@ pub contract BandOracle {
 
     ///
     ///
-    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): ReferenceData? {
-        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
-        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
-        if (baseRefData == nil || quoteRefData == nil) {
-            return nil
-        } else {
-            let rate = UInt256((UInt256(baseRefData!.rate) * BandOracle.e18) / UInt256(quoteRefData!.rate)) 
-            return ReferenceData (rate: rate, 
-                            baseTimestamp: baseRefData!.timestamp,
-                            quoteTimestamp: quoteRefData!.timestamp)
-        }
-        
+    ///
+    access(contract) fun calculateReferenceData (baseRefData: RefData, quoteRefData: RefData): ReferenceData {
+        let rate = UInt256((UInt256(baseRefData.rate) * BandOracle.e18) / UInt256(quoteRefData.rate)) 
+        return ReferenceData (rate: rate, 
+                        baseTimestamp: baseRefData.timestamp,
+                        quoteTimestamp: quoteRefData.timestamp)
     }
 
+    ///
+    ///
+    ///
+    access(contract) fun setFee (fee: UFix64) {
+        BandOracle.fee = fee
+    }
+
+    ///
+    ///
+    ///
+    access(contract) fun collectFees (): @FungibleToken.Vault {
+        let collectedFees <- FlowToken.createEmptyVault()
+        collectedFees.deposit(from: <- BandOracle.payments.withdraw(amount: BandOracle.payments.balance))
+        return <- collectedFees
+    }    
+
+    /// Public access functions
+
+    ///
+    ///
+    ///
+    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @FungibleToken.Vault): ReferenceData {
+        pre {
+            BandOracle._getRefData(symbol: baseSymbol) != nil: "No quotes for base symbol"
+            BandOracle._getRefData(symbol: quoteSymbol) != nil: "No quotes for base symbol"
+            payment.balance >= BandOracle.fee : "Insufficient balance"
+        }
+        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)!
+        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
+        BandOracle.payments.deposit(from: <- payment)
+        return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
+    }
+
+    ///
     ///
     ///
     pub fun createRelay (updaterCapability: Capability<&{DataUpdater}>): @Relay {
@@ -241,16 +314,45 @@ pub contract BandOracle {
 
     ///
     ///
+    ///
+    pub fun getFee (): UFix64 {
+        return BandOracle.fee
+    }
+
+    ///
+    ///
+    ///
+    pub fun getFreeReferenceData (baseSymbol: String, quoteSymbol: String): ReferenceData? {
+
+        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
+        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
+
+        if (baseRefData == nil || quoteRefData == nil) {
+            return nil
+        } else {
+            let rate = UInt256((UInt256(baseRefData!.rate) * BandOracle.e18) / UInt256(quoteRefData!.rate)) 
+            return ReferenceData (rate: rate, 
+                            baseTimestamp: baseRefData!.timestamp,
+                            quoteTimestamp: quoteRefData!.timestamp)
+        }
+    }
+
+    ///
+    ///
     init() {
         self.OracleAdminStoragePath = /storage/BandOracleAdmin
         self.OracleAdminPrivatePath = /private/BandOracleAdmin
         self.RelayStoragePath = /storage/BandOracleRelay
         self.RelayPrivatePath = /private/BandOracleRelay
+        self.FeeCollectorStoragePath = /storage/BandOracleFeeCollector
         self.dataUpdaterPrivateBasePath = "DataUpdater"
         self.account.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
+        self.payments <- FlowToken.createEmptyVault()
+        self.fee = 0.0
         self.e18 = 1000000000000000000
+        self.e9 = 1000000000
         // Create a relayer on the admin account so the relay methods are never accessed directly.
         // The admin could decide to build a transaction borrowing the whole BandOracleAdmin
         // resource and call updateData methods bypassing relayData methods but we are explicitly

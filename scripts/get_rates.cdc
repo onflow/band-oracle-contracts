@@ -1,6 +1,5 @@
-import BandOracle from "./../contracts/BandOracle.cdc"
+import "BandOracle"
 
 pub fun main(baseSymbol: String, quoteSymbol: String): BandOracle.ReferenceData? {
-    return BandOracle.getReferenceData (baseSymbol: baseSymbol, quoteSymbol: quoteSymbol)
+    return BandOracle.getFreeReferenceData (baseSymbol: baseSymbol, quoteSymbol: quoteSymbol)
 }
-
