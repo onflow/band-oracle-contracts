@@ -4,7 +4,14 @@
 			"source": "contracts/BandOracle.cdc",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
-				"testnet":  "4772ee0aba864de9"
+				"testnet":  "4772ee0aba864de9",
+				"testing": "000000000000006"
+			}
+		},
+		"ExampleConsumer": {
+			"source": "contracts/ExampleConsumer.cdc",
+			"aliases": {
+				"testing": "000000000000007"
 			}
 		},
 		"FlowToken": {
@@ -22,6 +29,7 @@
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
+    	"testing": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
