@@ -8,8 +8,8 @@ pub contract ExampleConsumer {
     pub var flowBTC: BandOracle.ReferenceData?
 
     // Public function that can be used for paying the fee and update the Flow token price on the contract
-    pub fun queryFlowBtcData (payment: @FungibleToken.Vault) {
-        ExampleConsumer.flowBTC = BandOracle.getReferenceData(baseSymbol: "BTC", quoteSymbol: "FLOW", payment: <- payment)
+    pub fun queryFlowBtcData () {
+        ExampleConsumer.flowBTC = BandOracle.getReferenceData(baseSymbol: "BTC", quoteSymbol: "FLOW")
     }
 
     // Public function for checking the updated price
