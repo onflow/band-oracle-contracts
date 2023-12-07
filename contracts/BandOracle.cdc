@@ -34,6 +34,12 @@ pub contract BandOracle {
     // Aux constant for holding the 10^9 value.
     pub let e9: UInt64
 
+    // Vault for storing service fees.
+    access(contract) let payments: @FungibleToken.Vault
+
+    // Service fee per request.
+    access(contract) var fee: UFix64
+
 
     /// Events
     
@@ -72,9 +78,9 @@ pub contract BandOracle {
         /// UNIX epoch when quote data is last resolved. 
         pub var quoteTimestamp: UInt64
 
-        init(rate: UInt256, baseTimestamp: UInt64, quoteTimestamp: UInt64) {
-            self.integerE18Rate = rate
-            self.fixedPointRate = UFix64(rate) / UFix64(BandOracle.e18)
+        init(e18Rate: UInt256, fixedRate: UFix64,  baseTimestamp: UInt64, quoteTimestamp: UInt64) {
+            self.integerE18Rate = e18Rate
+            self.fixedPointRate = fixedRate
             self.baseTimestamp = baseTimestamp
             self.quoteTimestamp = quoteTimestamp
         }
@@ -88,6 +94,7 @@ pub contract BandOracle {
     pub resource interface OracleAdmin {
         pub fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath
         pub fun removeSymbol (symbol: String)
+        pub fun createNewFeeCollector (): @BandOracle.FeeCollector
     }
 
     /// Relayer operations.
@@ -154,6 +161,16 @@ pub contract BandOracle {
             BandOracle.forceUpdateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
                                     requestID: requestID, relayerID: relayerID)
         }
+
+        /// Creates a fee collector, meant to be called once after contract deployment
+        /// for storing the resource on the maintainer's account.
+        ///
+        /// @return The `FeeCollector` resource
+        ///
+        pub fun createNewFeeCollector (): @FeeCollector {
+            return <- create FeeCollector()
+        }
+
     }
 
     /// The resource that will allow an account to make quote updates
@@ -192,6 +209,28 @@ pub contract BandOracle {
             let updaterRef = self.updaterCapability.borrow() 
                 ?? panic ("Can't borrow linked updater")
         }
+    }
+
+    /// The resource that allows the maintainer account to charge a fee for the use of the oracle.
+    ///
+    pub resource FeeCollector {
+
+        /// Sets the fee in Flow tokens for the oracle use.
+        ///
+        /// @param fee: The amount of Flow tokens.
+        ///
+        pub fun setFee (fee: UFix64) {
+            BandOracle.setFee(fee: fee)
+        }
+
+        /// Extracts the fees from the contract's vault.
+        /// 
+        /// @return A vault containing the funds obtained for the oracle use.
+        ///
+        pub fun collectFees (): @FungibleToken.Vault {
+            return <- BandOracle.collectFees()
+        }
+
     }
 
 
@@ -269,10 +308,30 @@ pub contract BandOracle {
     /// @return Calculated `ReferenceData` structure.
     ///
     access(contract) fun calculateReferenceData (baseRefData: RefData, quoteRefData: RefData): ReferenceData {
-        let rate = UInt256((UInt256(baseRefData.rate) * BandOracle.e18) / UInt256(quoteRefData.rate)) 
-        return ReferenceData (rate: rate, 
-                        baseTimestamp: baseRefData.timestamp,
-                        quoteTimestamp: quoteRefData.timestamp)
+            let rate = UInt256((UInt256(baseRefData.rate) * BandOracle.e18) / UInt256(quoteRefData.rate)) 
+            let fixedRate = UFix64(baseRefData.rate) / UFix64(quoteRefData.rate)
+            return ReferenceData (e18Rate: rate,
+                            fixedRate: fixedRate,
+                            baseTimestamp: baseRefData.timestamp,
+                            quoteTimestamp: quoteRefData.timestamp)
+    }
+
+    /// Private method for the `FeeCollector` to be able to set the fee for using the oracle
+    ///
+    /// @param fee: The amount of flow tokens to set as fee.
+    ///
+    access(contract) fun setFee (fee: UFix64) {
+        BandOracle.fee = fee
+    }
+
+    /// Private method for the `FeeCollector` to be able to collect the fees from the contract vault.
+    ///
+    /// @return A flow token vault with the collected fees so far.
+    ///
+    access(contract) fun collectFees (): @FungibleToken.Vault {
+        let collectedFees <- FlowToken.createEmptyVault()
+        collectedFees.deposit(from: <- BandOracle.payments.withdraw(amount: BandOracle.payments.balance))
+        return <- collectedFees
     }
 
 
@@ -301,25 +360,31 @@ pub contract BandOracle {
         return capabilityName
     }
 
-    /// The entry point for consumers to query the oracle.
+    /// This function returns the current fee for using the oracle in Flow tokens.
+    ///
+    /// @return The fee to be charged for every request made to the oracle.
+    ///
+    pub fun getFee (): UFix64 {
+        return BandOracle.fee
+    }
+
+    /// The entry point for consumers to query the oracle in exchange of a fee.
     ///
     /// @param baseSymbol: String representing base symbol.
     /// @param quoteSymbol: String representing quote symbol.
+    /// @param payment: Flow token vault containing the service fee.
     /// @return The `ReferenceData` containing the requested data.
     ///
-    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): ReferenceData? {
-
-        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)
-        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)
-
-        if (baseRefData == nil || quoteRefData == nil) {
-            return nil
-        } else {
-            let rate = UInt256((UInt256(baseRefData!.rate) * BandOracle.e18) / UInt256(quoteRefData!.rate)) 
-            return ReferenceData (rate: rate, 
-                            baseTimestamp: baseRefData!.timestamp,
-                            quoteTimestamp: quoteRefData!.timestamp)
+    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @FungibleToken.Vault): ReferenceData {
+        pre {
+            BandOracle._getRefData(symbol: baseSymbol) != nil: "No quotes for base symbol"
+            BandOracle._getRefData(symbol: quoteSymbol) != nil: "No quotes for base symbol"
+            payment.balance >= BandOracle.fee : "Insufficient balance"
         }
+        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)!
+        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
+        BandOracle.payments.deposit(from: <- payment)
+        return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
     }
 
     init() {
@@ -332,6 +397,8 @@ pub contract BandOracle {
         self.account.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
+        self.payments <- FlowToken.createEmptyVault()
+        self.fee = 0.0
         self.e18 = 1_000_000_000_000_000_000
         self.e9 = 1_000_000_000
         // Create a relayer on the admin account so the relay methods are never accessed directly.
