@@ -32,7 +32,7 @@ pub contract BandOracle {
     pub let e18: UInt256
 
     // Aux constant for holding the 10^9 value.
-    pub let e9: UInt64
+    pub let e9: UInt256
 
     // Vault for storing service fees.
     access(contract) let payments: @FungibleToken.Vault
@@ -78,9 +78,9 @@ pub contract BandOracle {
         /// UNIX epoch when quote data is last resolved. 
         pub var quoteTimestamp: UInt64
 
-        init(e18Rate: UInt256, fixedRate: UFix64,  baseTimestamp: UInt64, quoteTimestamp: UInt64) {
-            self.integerE18Rate = e18Rate
-            self.fixedPointRate = fixedRate
+        init(rate: UInt256, baseTimestamp: UInt64, quoteTimestamp: UInt64) {
+            self.integerE18Rate = rate
+            self.fixedPointRate = BandOracle.e18ToFixedPoint(rate: rate)
             self.baseTimestamp = baseTimestamp
             self.quoteTimestamp = quoteTimestamp
         }
@@ -295,7 +295,7 @@ pub contract BandOracle {
     access(contract) fun _getRefData (symbol: String): RefData? {
         // If the requested symbol is USD just return 10^9
         if (symbol == "USD") {
-            return RefData(rate: BandOracle.e9, timestamp: UInt64(getCurrentBlock().timestamp), requestID: 0)
+            return RefData(rate: UInt64(BandOracle.e9), timestamp: UInt64(getCurrentBlock().timestamp), requestID: 0)
         } else {
             return self.symbolsRefData[symbol] ?? nil
         }
@@ -308,10 +308,8 @@ pub contract BandOracle {
     /// @return Calculated `ReferenceData` structure.
     ///
     access(contract) fun calculateReferenceData (baseRefData: RefData, quoteRefData: RefData): ReferenceData {
-            let rate = UInt256((UInt256(baseRefData.rate) * BandOracle.e18) / UInt256(quoteRefData.rate)) 
-            let fixedRate = UFix64(baseRefData.rate) / UFix64(quoteRefData.rate)
-            return ReferenceData (e18Rate: rate,
-                            fixedRate: fixedRate,
+            let rate = UInt256((UInt256(baseRefData.rate) * BandOracle.e18) / UInt256(quoteRefData.rate))
+            return ReferenceData (rate: rate,
                             baseTimestamp: baseRefData.timestamp,
                             quoteTimestamp: quoteRefData.timestamp)
     }
@@ -385,6 +383,32 @@ pub contract BandOracle {
         let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
         BandOracle.payments.deposit(from: <- payment)
         return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
+    }
+
+    /// Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
+    /// fixed point numbers
+    ///
+    /// @param
+    /// @return
+    ///
+    pub fun e18ToFixedPoint (rate: UInt256): UFix64 {
+        return  (
+                    UFix64(
+                        rate / BandOracle.e18
+                    ) 
+                        + 
+                    (
+                        UFix64(
+                            (rate 
+                                / 
+                            BandOracle.e9) 
+                                % 
+                            BandOracle.e9
+                        )
+                            /
+                        UFix64(BandOracle.e9)
+                    ) 
+                )
     }
 
     init() {
