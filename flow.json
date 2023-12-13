@@ -8,12 +8,6 @@
 				"testing": "000000000000006"
 			}
 		},
-		"ExampleConsumer": {
-			"source": "contracts/ExampleConsumer.cdc",
-			"aliases": {
-				"testing": "000000000000007"
-			}
-		},
 		"FlowToken": {
 			"source": "contracts/utility/FlowToken.cdc",
 			"aliases": {
