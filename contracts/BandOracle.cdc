@@ -417,7 +417,7 @@ pub contract BandOracle {
         self.RelayStoragePath = /storage/BandOracleRelay
         self.RelayPrivatePath = /private/BandOracleRelay
         self.FeeCollectorStoragePath = /storage/BandOracleFeeCollector
-        self.dataUpdaterPrivateBasePath = "DataUpdater"
+        self.dataUpdaterPrivateBasePath = "BandOracleDataUpdater"
         self.account.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
