@@ -46,6 +46,9 @@ pub contract BandOracle {
     // Emitted when a relayer updates a set of symbols.
     pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
 
+    // Emitted when a symbol is removed from the oracle.
+    pub event BandOracleSymbolRemoved(symbol: String)
+
 
     /// Structs
     
@@ -285,6 +288,7 @@ pub contract BandOracle {
     ///
     access(contract) fun removeSymbol (symbol: String) {
         BandOracle.symbolsRefData.remove(key: symbol)
+        emit BandOracleSymbolRemoved(symbol: symbol)
     }
 
     /// Auxiliary private function for checking and retrieving data for a given symbol.
