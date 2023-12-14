@@ -1,12 +1,17 @@
 import "BandOracle"
 
 transaction (fee: UFix64) {
+    let feeCollector: &BandOracle.FeeCollector
 
     prepare (collector: AuthAccount){
-        let feeCollector  <- collector.load<@BandOracle.FeeCollector>(from: BandOracle.FeeCollectorStoragePath) ??
-            panic("Cannot load fee collector from maintainer storage")
-        feeCollector.setFee(fee: fee)
-        collector.save(<- feeCollector, to: BandOracle.FeeCollectorStoragePath)
+        self.feeCollector = collector.borrow<&BandOracle.FeeCollector>(from: BandOracle.FeeCollectorStoragePath)
+            ?? panic("Cannot load fee collector from maintainer storage")
     }
-
+    execute {
+        self.feeCollector.setFee(fee: fee)
+    }
+    
+    post {
+        BandOracle.getFee() == fee: "Fee was not set correctly"
+    }
 }
