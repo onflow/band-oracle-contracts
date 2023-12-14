@@ -19,7 +19,7 @@ pub contract BandOracle {
 
     pub let e18: UInt256
 
-    pub let e9: UInt64
+    pub let e9: UInt256
 
     access(contract) let payments: FungibleToken.Vault
 
@@ -232,28 +232,12 @@ Returns: A flow token vault with the collected fees so far.
 
 ---
 
-### `getReferenceData()`
-
-```cadence
-fun getReferenceData(baseSymbol: String, quoteSymbol: String, payment: FungibleToken.Vault): ReferenceData
-```
-Public access functions.
-The entry point for consumers to query the oracle in exchange of a fee.
-
-Parameters:
-  - baseSymbol : _String representing base symbol._
-  - quoteSymbol : _String representing quote symbol._
-  - payment : _Flow token vault containing the service fee._
-
-Returns: The `ReferenceData` containing the requested data.
-
----
-
 ### `createRelay()`
 
 ```cadence
 fun createRelay(updaterCapability: Capability<&{DataUpdater}>): Relay
 ```
+Public access functions.
 Public method for creating a relay and become a relayer.
 
 Parameters:
@@ -288,18 +272,32 @@ Returns: The fee to be charged for every request made to the oracle.
 
 ---
 
-### `getFreeReferenceData()`
+### `getReferenceData()`
 
 ```cadence
-fun getFreeReferenceData(baseSymbol: String, quoteSymbol: String): ReferenceData?
+fun getReferenceData(baseSymbol: String, quoteSymbol: String, payment: FungibleToken.Vault): ReferenceData
 ```
-A testing method to query the oracle using a script.
+The entry point for consumers to query the oracle in exchange of a fee.
 
 Parameters:
   - baseSymbol : _String representing base symbol._
   - quoteSymbol : _String representing quote symbol._
+  - payment : _Flow token vault containing the service fee._
 
-Returns: A reference data struct if both symbols exists on the oracle.
+Returns: The `ReferenceData` containing the requested data.
+
+---
+
+### `e18ToFixedPoint()`
+
+```cadence
+fun e18ToFixedPoint(rate: UInt256): UFix64
+```
+Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
+fixed point numbers
+
+@param
+@return
 
 ---
 ## Events
@@ -308,6 +306,14 @@ Returns: A reference data struct if both symbols exists on the oracle.
 
 ```cadence
 pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
+```
+
+---
+
+### `BandOracleSymbolRemoved`
+
+```cadence
+pub event BandOracleSymbolRemoved(symbol: String)
 ```
 
 ---
