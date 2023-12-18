@@ -65,15 +65,6 @@ pub fun testRelayQuotes () {
     Test.assertEqual(1, symbolsUpdatedEvents.length)
 }
 
-pub fun testGetFreeRates () {
-    let txResult = executeTransaction (
-        "../transactions/Consumer/get_free_rates.cdc",
-        ["BTC", "FLOW"],
-        consumer
-    )
-    Test.expect(txResult, Test.beSucceeded())
-}
-
 pub fun testRelayUpdatedQuotes () {
     let txResult = executeTransaction(
         "../transactions/Relayer/relay_rates.cdc",
@@ -87,13 +78,6 @@ pub fun testRelayUpdatedQuotes () {
     log(event)
     Test.assertEqual(["BTC","FLOW"], event.symbols)
     Test.assertEqual(1 as UInt64, event.requestID)
-    
-    let txResult2 = executeTransaction (
-        "../transactions/Consumer/get_free_rates.cdc",
-        ["BTC", "FLOW"],
-        consumer
-    )
-    Test.expect(txResult2, Test.beSucceeded())
 }
 
 pub fun testRelayOlderUpdatedQuotes () {
@@ -109,13 +93,6 @@ pub fun testRelayOlderUpdatedQuotes () {
     log(event)
     Test.assertEqual([] as [String], event.symbols)
     Test.assertEqual(2 as UInt64, event.requestID)
-
-    let txResult2 = executeTransaction (
-        "../transactions/Consumer/get_free_rates.cdc",
-        ["BTC", "FLOW"],
-        consumer
-    )
-    Test.expect(txResult2, Test.beSucceeded())
 }
 
 pub fun testForceRelayQuotes () {
@@ -130,13 +107,6 @@ pub fun testForceRelayQuotes () {
     let event = symbolsUpdatedEvents[3] as! BandOracle.BandOracleSymbolsUpdated
     Test.assertEqual(["BTC","FLOW"], event.symbols)
     Test.assertEqual(3 as UInt64, event.requestID)
-
-    let txResult2 = executeTransaction (
-        "../transactions/Consumer/get_free_rates.cdc",
-        ["BTC", "FLOW"],
-        consumer
-    )
-    Test.expect(txResult2, Test.beSucceeded())
 }
 
 pub fun testSetFee () {
@@ -148,19 +118,10 @@ pub fun testSetFee () {
     Test.expect(txResult, Test.beSucceeded())
 }
 
-pub fun testFeeNeededForGetRates () {
-    let txResult = executeTransaction (
-        "../transactions/Consumer/get_free_rates.cdc",
-        ["BTC", "FLOW"],
-        consumer
-    )
-    Test.expect(txResult, Test.beFailed())
-}
-
-pub fun testGetPaidRates () {
+pub fun testGetRates () {
     mintFlow(to: consumer, amount: 1500.0)
     let txResult = executeTransaction (
-        "../transactions/Consumer/get_paid_rates.cdc",
+        "../transactions/Consumer/get_rates.cdc",
         ["BTC", "FLOW"],
         consumer
     )
