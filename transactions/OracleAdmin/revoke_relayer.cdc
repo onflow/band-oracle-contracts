@@ -1,4 +1,4 @@
-import BandOracle from "./../../contracts/BandOracle.cdc"
+import "BandOracle"
 
 transaction(relayer: Address) {
     prepare(acct: AuthAccount){

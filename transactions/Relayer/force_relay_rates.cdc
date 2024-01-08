@@ -1,4 +1,4 @@
-import BandOracle from "./../../contracts/BandOracle.cdc"
+import "BandOracle"
 
 transaction (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
     let relayRef: &BandOracle.Relay

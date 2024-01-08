@@ -1,15 +1,35 @@
 {
 	"contracts": {
-		"BandOracle": "contracts/BandOracle.cdc"
+		"BandOracle": {
+			"source": "contracts/BandOracle.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"testnet":  "4772ee0aba864de9",
+				"testing": "000000000000006"
+			}
+		},
+		"FlowToken": {
+			"source": "contracts/utility/FlowToken.cdc",
+			"aliases": {
+				"emulator": "0ae53cb6e3f42a79"
+			}
+		},
+		"FungibleToken": {
+			"source": "contracts/utility/FungibleToken.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6"
+			}
+		}
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
+    	"testing": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
 		"default": {
-			"address": "f669cb8d41ce0c74",
+			"address": "045a1763c93006ca",
 			"key": "83c4da8100a5bb0086fd0835e0b48dbdf507ca4aa15dab56edccee06c82eb110"
 		},
 		"emulator-account": {
