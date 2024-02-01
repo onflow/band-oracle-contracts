@@ -259,6 +259,8 @@ by both admin and relayers.
 Parameters:
   - relayer : _Address of the account who will be granted with a relayer._
 
+Returns: The capability name.
+
 ---
 
 ### `getFee()`
@@ -294,10 +296,13 @@ Returns: The `ReferenceData` containing the requested data.
 fun e18ToFixedPoint(rate: UInt256): UFix64
 ```
 Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
-fixed point numbers
+fixed point numbers. Exceptionally large integer rates may lose some precision
+when converted to a decimal number.
 
-@param
-@return
+Parameters:
+  - rate : _The symbol rate as an integer._
+
+Returns: The symbol rate as a decimal.
 
 ---
 ## Events
