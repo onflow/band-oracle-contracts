@@ -1,5 +1,5 @@
 # Band Oracle Contract
-The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network offers cryptocurrency price quotes for consumption by Flow applications. 
+The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network offers ~100 cryptocurrency [price quotes](https://data.bandprotocol.com/) available to any Cadence applications, contracts or transactions.  
 
 To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
