@@ -2,23 +2,15 @@ import "FungibleToken"
 import "FlowToken"
 import "BandOracle"
 
-// Example contract showing how to use the Band Protocol Oracle.
-// The contract represents a FungibleToken that can be minted by anyone by giving flow
-// tokens in exchange. The price of the `BandExampleConsumerToken` is fixed by the admin 
-// in USD. Then, using band oracle the equivalent amount of Flow tokens needed for
-// purchasing BandExampleConsumerTokens is calculated.
-// This simple example exposes one of the most important things to think about when
-// using the BandOracle contract, minding when and how update rates used by your contract.
-// Here, we opt for the simplest approach of updating the price every time a user wants to
-// know the current price in Flow tokens of the example token. While this approach will assure that 
-// the tokens are sold at the most updated FLOW/USD price, it will allow a spam attack
-// vector where a malicious user could just call infinitely this method draining your
-// funds. Also, a legit use of this approach could cause you to incur into too much 
-// fees costs. Alternatively, you could use an approach where you update periodically 
-// the rate on your contract, potentially incurring in lesser fees expenses but exposing 
-// the token price to market volatility. The purpose of your contract should determine 
-// how you consume the BandOracle rates. 
-//
+/**
+Example contract to illustrate how to use the Band Protocol Oracle.
+
+This contract represents a FungibleToken, a requested amount of which can be minted by anyone based on payment provided in a FLOW token vault. The price of `BandExampleConsumerToken` is fixed by the admin in USD. The price set is then used to enforce a minimum and calculate the cost in FLOW to mint the requested amount of tokens.
+
+This simple example highlights trade-offs to consider regarding timing and synchronization when requesting price quotes, particularly when integrating the oracle from a dapp contract. It uses a naive approach to synchronously request the quote from `BandOracle` within the function. This ensures the most accurate and up to date price. It's also the most expensive. Especially because it's a spam attack vector by which a malicious caller's DOS attack could quickly drain funds from the dapp contract due to the synchronous implementation. Accessing the oracle price quote directly in the code of a transaction rather than through contract code does is not subject to the above spam risk, although cost may still be a consideration.
+
+An alternative approach is to use periodic price updates, enforcing asynchrony through a cache for example. This mitigates the spam attack risk, however, it increases exposure to market volatility. Applications must determine their level of price accuracy vs cost according to their use cases and financial risk tolerance.
+**/
 pub contract BandExampleConsumerToken: FungibleToken {
 
     // The USD price is determined by the admin, then the equivalent Flow price is 
