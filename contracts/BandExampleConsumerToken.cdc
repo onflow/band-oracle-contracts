@@ -133,32 +133,24 @@ pub contract BandExampleConsumerToken: FungibleToken {
 
     // Private contract function that calls the `BandOracle.getReferenceData` method
     // for updating the `tokenFlowPrice` field.
-    access(contract) fun updateFlowPrice () {
-        let payment <- BandExampleConsumerToken.flowTreasure.withdraw(amount: BandOracle.getFee())
+    access(contract) fun updateFlowPrice(): UFix64 {
+        let payment <- self.flowTreasure.withdraw(amount: BandOracle.getFee())
         let usdFlowData = BandOracle.getReferenceData (baseSymbol: "USD", quoteSymbol: "FLOW", payment: <- payment)
-        BandExampleConsumerToken.tokenFlowPrice = BandExampleConsumerToken.tokenUSDPrice * usdFlowData.fixedPointRate
-    }
-
-    // Public function that allows any user to query the current token price. Mind that
-    // it will call the internal `updateFlowPrice` method, therefore it will request
-    // a rate update from the Band Oracle.
-    pub fun getTokenFlowPrice (): UFix64 {
-        self.updateFlowPrice()
+        self.tokenFlowPrice = self.tokenUSDPrice * usdFlowData.fixedPointRate
         return self.tokenFlowPrice
     }
 
     // Public function that allows anyone to mint themselves a bunch of tokens, in 
     // exchange of the needed amount of Flow tokens.
-    pub fun mintTokens(amount: UFix64, payment: @FungibleToken.Vault): @BandExampleConsumerToken.Vault {
+    pub fun swapTokens(maxPrice: UFix64, payment: @FungibleToken.Vault): @BandExampleConsumerToken.Vault {
         pre {
-            amount > UFix64(0): "Amount minted must be greater than zero"
-            amount * self.tokenFlowPrice > payment.balance: "Insufficient funds for minting"
+            self.updateFlowPrice() < maxPrice: "Current token price is higher than the maximum desired price,"
         }
-
+        let amount = payment.balance / self.tokenFlowPrice
+        self.flowTreasure.deposit(from: <-payment)
         self.totalSupply = self.totalSupply + amount
-        self.flowTreasure.deposit(from: <- payment)
         emit TokensMinted(amount: amount)
-        return <-create Vault(balance: amount)
+        return <- create Vault(balance: amount)
     }
 
     init() {
