@@ -5,11 +5,26 @@ import "BandOracle"
 /**
 Example contract to illustrate how to use the Band Protocol Oracle.
 
-This contract represents a FungibleToken, a requested amount of which can be minted by anyone based on payment provided in a FLOW token vault. The price of `BandExampleConsumerToken` is fixed by the admin in USD. The price set is then used to enforce a minimum and calculate the cost in FLOW to mint the requested amount of tokens.
+This contract represents a FungibleToken, a requested amount of which can be minted 
+by anyone based on payment provided in a FLOW token vault. The price of 
+`BandExampleConsumerToken` is fixed by the admin in USD. The price set is then used 
+to enforce a minimum and calculate the cost in FLOW to mint the requested amount of 
+tokens.
 
-This simple example highlights trade-offs to consider regarding timing and synchronization when requesting price quotes, particularly when integrating the oracle from a dapp contract. It uses a naive approach to synchronously request the quote from `BandOracle` within the function. This ensures the most accurate and up to date price. It's also the most expensive. Especially because it's a spam attack vector by which a malicious caller's DOS attack could quickly drain funds from the dapp contract due to the synchronous implementation. Accessing the oracle price quote directly in the code of a transaction rather than through contract code does is not subject to the above spam risk, although cost may still be a consideration.
+This simple example highlights trade-offs to consider regarding timing and 
+synchronization when requesting price quotes, particularly when integrating the 
+oracle from a dapp contract. It uses a naive approach to synchronously request the 
+quote from `BandOracle` within the function. This ensures the most accurate and up 
+to date price. It's also the most expensive. Especially because it's a spam attack 
+vector by which a malicious caller's DOS attack could quickly drain funds from the 
+dapp contract due to the synchronous implementation. Accessing the oracle price quote 
+directly in the code of a transaction rather than through contract code does is not 
+subject to the above spam risk, although cost may still be a consideration.
 
-An alternative approach is to use periodic price updates, enforcing asynchrony through a cache for example. This mitigates the spam attack risk, however, it increases exposure to market volatility. Applications must determine their level of price accuracy vs cost according to their use cases and financial risk tolerance.
+An alternative approach is to use periodic price updates, enforcing asynchrony 
+through a cache for example. This mitigates the spam attack risk, however, it 
+increases exposure to market volatility. Applications must determine their level of 
+price accuracy vs cost according to their use cases and financial risk tolerance.
 **/
 pub contract BandExampleConsumerToken: FungibleToken {
 
@@ -126,25 +141,28 @@ pub contract BandExampleConsumerToken: FungibleToken {
         
         pub fun setNewTokensUSDPrice (price: UFix64) {
             BandExampleConsumerToken.tokenUSDPrice = price
-            BandExampleConsumerToken.updateFlowPrice()
+            BandExampleConsumerToken.updateTokenFlowPrice()
+        }
+
+        pub fun updateTokenFlowPrice () {
+            BandExampleConsumerToken.updateTokenFlowPrice()
         }
 
     }
 
     // Private contract function that calls the `BandOracle.getReferenceData` method
     // for updating the `tokenFlowPrice` field.
-    access(contract) fun updateFlowPrice(): UFix64 {
+    access(contract) fun updateTokenFlowPrice() {
         let payment <- self.flowTreasure.withdraw(amount: BandOracle.getFee())
         let usdFlowData = BandOracle.getReferenceData (baseSymbol: "USD", quoteSymbol: "FLOW", payment: <- payment)
         self.tokenFlowPrice = self.tokenUSDPrice * usdFlowData.fixedPointRate
-        return self.tokenFlowPrice
     }
 
     // Public function that allows anyone to mint themselves a bunch of tokens, in 
     // exchange of the needed amount of Flow tokens.
     pub fun swapTokens(maxPrice: UFix64, payment: @FungibleToken.Vault): @BandExampleConsumerToken.Vault {
         pre {
-            self.updateFlowPrice() < maxPrice: "Current token price is higher than the maximum desired price,"
+            self.tokenFlowPrice < maxPrice: "Current token price is higher than the maximum desired price,"
         }
         let amount = payment.balance / self.tokenFlowPrice
         self.flowTreasure.deposit(from: <-payment)
