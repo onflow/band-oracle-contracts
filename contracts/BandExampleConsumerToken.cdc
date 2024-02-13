@@ -11,20 +11,15 @@ by anyone based on payment provided in a FLOW token vault. The price of
 to enforce a minimum and calculate the cost in FLOW to mint the requested amount of 
 tokens.
 
-This simple example highlights trade-offs to consider regarding timing and 
-synchronization when requesting price quotes, particularly when integrating the 
-oracle from a dapp contract. It uses a naive approach to synchronously request the 
-quote from `BandOracle` within the function. This ensures the most accurate and up 
-to date price. It's also the most expensive. Especially because it's a spam attack 
-vector by which a malicious caller's DOS attack could quickly drain funds from the 
-dapp contract due to the synchronous implementation. Accessing the oracle price quote 
-directly in the code of a transaction rather than through contract code does is not 
-subject to the above spam risk, although cost may still be a consideration.
+This contract showcases a function enabling the exchange of Flow tokens for 
+`BandExampleConsumerTokens`. When the swap function is invoked, the contract 
+leverages the most recent FLOW/USD exchange rate stored.
 
-An alternative approach is to use periodic price updates, enforcing asynchrony 
-through a cache for example. This mitigates the spam attack risk, however, it 
-increases exposure to market volatility. Applications must determine their level of 
-price accuracy vs cost according to their use cases and financial risk tolerance.
+To keep the exchange rates up to date, the dapp should listen for the 
+`BandOracleSymbolsUpdated` event emitted by the BandOracle contract. When a symbol 
+used in the dapp experiences a change in its exchange rate, a transaction should be 
+run to update the rates within the contract. In this example, calling the 
+`updateTokenFlowPrice()` method from the admin resource achieves this.
 **/
 pub contract BandExampleConsumerToken: FungibleToken {
 
