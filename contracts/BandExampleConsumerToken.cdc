@@ -22,7 +22,10 @@ Unless you are operating an exchange, or otherwise exposing price quotes obtaine
 callers of your contract, other use-cases may only need to query current price quotes using 
 a transaction.
 
-We recommend that dapps maintain up to date price quotes by listening for the `BandOracleSymbolsUpdated` event emitted by the BandOracle contract. When a symbol used by the dapp has it's price updated, a transaction should be run to update price quotes within the contract. In the current example calling the `updateTokenFlowPrice()` method from the admin resource achieves this.
+We recommend that dapps maintain up to date price quotes by listening for the `BandOracleSymbolsUpdated` 
+event emitted by the BandOracle contract. When a symbol used by the dapp has it's price updated, a 
+transaction should be run to update price quotes within the contract. In the current example calling the
+`updateTokenFlowPrice()` method from the admin resource achieves this.
 **/
 pub contract BandExampleConsumerToken: FungibleToken {
 
