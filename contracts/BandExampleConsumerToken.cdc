@@ -11,9 +11,16 @@ by anyone based on payment provided in a FLOW token vault. The price of
 to enforce a minimum and calculate the cost in FLOW to mint the requested amount of 
 tokens.
 
-This contract showcases a function enabling the exchange of Flow tokens for 
+This example contract showcases a function enabling the exchange of Flow tokens for 
 `BandExampleConsumerTokens`. When the swap function is invoked, the contract 
-leverages the most recent FLOW/USD exchange rate stored.
+leverages the most recently stored FLOW/USD price quote for the token swap. 
+
+It should be noted that this contract example is not representative of how oracle integration
+would generally be implemented. The example highlights a use-case typically handled by 
+Decentralized Exchanges (DEXs) which use oracle price quotes to perform token swaps. 
+Unless you are operating an exchange, or otherwise exposing price quotes obtained to 
+callers of your contract, other use-cases may only need to query current price quotes using 
+a transaction.
 
 To keep the exchange rates up to date, the dapp should listen for the 
 `BandOracleSymbolsUpdated` event emitted by the BandOracle contract. When a symbol 
