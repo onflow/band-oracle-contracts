@@ -353,6 +353,7 @@ pub contract BandOracle {
     /// by both admin and relayers.
     ///
     /// @param relayer: Address of the account who will be granted with a relayer.
+    /// @return The capability name.
     ///
     pub fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
         // Create the string that will form the private path concatenating the base
@@ -390,10 +391,11 @@ pub contract BandOracle {
     }
 
     /// Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
-    /// fixed point numbers
+    /// fixed point numbers. Exceptionally large integer rates may lose some precision
+    /// when converted to a decimal number.
     ///
-    /// @param
-    /// @return
+    /// @param rate: The symbol rate as an integer.
+    /// @return The symbol rate as a decimal.
     ///
     pub fun e18ToFixedPoint (rate: UInt256): UFix64 {
         return  (

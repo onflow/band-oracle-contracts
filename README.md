@@ -1,7 +1,14 @@
 # Band Oracle Contract
-The Cadence smart contract(s) enabling Flow native integration of the Band Protocol oracle network. The oracle network will provide price updates for crypto, fiat and commodities financial data for consumption by Flow applications. 
+The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network offers ~100 cryptocurrency [price quotes](https://data.bandprotocol.com/) available to any Cadence applications, contracts or transactions.  
 
 To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
+
+## Contract Addresses 
+
+|Name|Testnet|Mainnet|
+|----|-------|-------|
+|[BandOracle](contracts/BandOracle.cdc)|[0x4772ee0aba864de9](https://flow-view-source.com/testnet/account/0x4772ee0aba864de9/contract/BandOracle)|[]()|
+
 
 ## How it works?
 The contract keeps a record of symbols and the corresponding financial price data for them. While financial data are only updated by authorized BandChain relayers, they can be queried via a script by any user or application on the Flow blockchain.
@@ -25,3 +32,7 @@ The account where the contract is deployed will be granted an `OracleAdmin` reso
 
 ### Querying the data
 When invoking the public function `pub fun getReferenceData (baseSymbol: String, quoteSymbol: String): RefData?` calling contracts or scripts would be provided the price corresponding to `quoteSymbol` in the `baseSymbol` currency. If there are no entries registered for either the base or quote symbols the function will return `nil`.
+
+### Fees
+
+[TBD]
