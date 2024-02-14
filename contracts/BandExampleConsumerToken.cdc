@@ -8,8 +8,8 @@ Example contract to illustrate how to use the Band Protocol Oracle.
 This contract represents a FungibleToken, a requested amount of which can be minted 
 by anyone based on payment provided in a FLOW token vault. The price of 
 `BandExampleConsumerToken` is fixed by the admin in USD. The price set is then used 
-to enforce a minimum and calculate the cost in FLOW to mint the requested amount of 
-tokens.
+to enforce a minimum and calculate the number of `BandExampleConsumerToken`s which can be swapped for 
+the amount of FLOW provided.
 
 This example contract showcases a function enabling the exchange of Flow tokens for 
 `BandExampleConsumerTokens`. When the swap function is invoked, the contract 
