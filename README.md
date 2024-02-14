@@ -3,6 +3,13 @@ The Cadence smart contract enabling integration of the Band Protocol Oracle netw
 
 To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
+## Contract Addresses 
+
+|Name|Testnet|Mainnet|
+|----|-------|-------|
+|[BandOracle](contracts/BandOracle.cdc)|[0x4772ee0aba864de9](https://flow-view-source.com/testnet/account/0x4772ee0aba864de9/contract/BandOracle)|[]()|
+
+
 ## How it works?
 The contract keeps a record of symbols and the corresponding financial price data for them. While financial data are only updated by authorized BandChain relayers, they can be queried via a script by any user or application on the Flow blockchain.
 

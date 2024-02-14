@@ -24,7 +24,7 @@ a transaction.
 
 We recommend that dapps maintain up to date price quotes by listening for the `BandOracleSymbolsUpdated` 
 event emitted by the BandOracle contract. When a symbol used by the dapp has it's price updated, a 
-transaction should be run to update price quotes within the dapp contract. In the current example calling the
+transaction should be run to update price quotes within the contract. In the current example calling the
 `updateTokenFlowPrice()` method from the admin resource achieves this.
 **/
 pub contract BandExampleConsumerToken: FungibleToken {
