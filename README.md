@@ -7,7 +7,7 @@ To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
 |Name|Testnet|Mainnet|
 |----|-------|-------|
-|[BandOracle](contracts/BandOracle.cdc)|[0x4772ee0aba864de9](https://flow-view-source.com/testnet/account/0x4772ee0aba864de9/contract/BandOracle)|[]()|
+|[BandOracle](contracts/BandOracle.cdc)|[0x4772ee0aba864de9](https://contractbrowser.com/A.4772ee0aba864de9.BandOracle)|[]()|
 
 
 ## How it works?
