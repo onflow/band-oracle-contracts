@@ -165,8 +165,9 @@ pub contract BandExampleConsumerToken: FungibleToken {
         pre {
             self.tokenFlowPrice < maxPrice: "Current token price is higher than the maximum desired price,"
         }
-        let amount = payment.balance / self.tokenFlowPrice
-        self.flowTreasure.deposit(from: <-payment)
+        let vault <- payment as! @BandExampleConsumerToken.Vault
+        let amount = vault.balance / self.tokenFlowPrice
+        self.flowTreasure.deposit(from: <-vault)
         self.totalSupply = self.totalSupply + amount
         emit TokensMinted(amount: amount)
         return <- create Vault(balance: amount)
