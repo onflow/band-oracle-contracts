@@ -119,7 +119,7 @@ access(all) contract BandOracle {
         ///
         /// @param relayer: The entitled relayer account address
         ///
-        access(all) fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath {
+        access(all) view fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath {
             // Create the string that will form the private path concatenating the base
             // path and the relayer identifying address
             let privatePathString = 
@@ -355,7 +355,7 @@ access(all) contract BandOracle {
     /// @param relayer: Address of the account who will be granted with a relayer.
     /// @return The capability name.
     ///
-    access(all) fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
+    access(all) view fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
         // Create the string that will form the private path concatenating the base
         // path and the relayer identifying address.
         let capabilityName = 
@@ -367,7 +367,7 @@ access(all) contract BandOracle {
     ///
     /// @return The fee to be charged for every request made to the oracle.
     ///
-    access(all) fun getFee (): UFix64 {
+    access(all) view fun getFee (): UFix64 {
         return BandOracle.fee
     }
 
@@ -378,7 +378,7 @@ access(all) contract BandOracle {
     /// @param payment: Flow token vault containing the service fee.
     /// @return The `ReferenceData` containing the requested data.
     ///
-    access(all) fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @FungibleToken.Vault): ReferenceData {
+    access(all) view fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @FungibleToken.Vault): ReferenceData {
         pre {
             BandOracle._getRefData(symbol: baseSymbol) != nil: "No quotes for base symbol"
             BandOracle._getRefData(symbol: quoteSymbol) != nil: "No quotes for base symbol"
