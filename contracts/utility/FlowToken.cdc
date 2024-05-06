@@ -1,6 +1,5 @@
 import "FungibleToken"
 import "MetadataViews"
-import "FungibleTokenMetadataViews"
 
 access(all) contract FlowToken: FungibleToken {
 
