@@ -117,9 +117,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
             emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
             vault.balance = 0.0
             destroy vault
-        }
 
-        destroy() {
             if self.balance > 0.0 {
                 BandExampleConsumerToken.totalSupply = BandExampleConsumerToken.totalSupply - self.balance
             }
@@ -159,7 +157,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
         self.tokenFlowPrice = self.tokenUSDPrice * usdFlowData.fixedPointRate
     }
 
-    // Public function that allows anyone to mint themselves a bunch of tokens, in 
+    // Public function that allows anyone to mint themselves a bunch of tokens, in
     // exchange of the needed amount of Flow tokens.
     access(all) fun swapTokens(maxPrice: UFix64, payment: @FungibleToken.Vault): @BandExampleConsumerToken.Vault {
         pre {
