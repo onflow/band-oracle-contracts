@@ -440,7 +440,7 @@ access(all) contract BandOracle {
         let dataUpdaterPrivatePath = oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: self.account.address)
         self.account.link<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath, target: BandOracle.OracleAdminStoragePath)
             ?? panic ("Data Updater capability for admin creation failed")
-        let updaterCapability = self.account.getCapability<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
+        let updaterCapability = self.account.capabilities.borrow<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
         let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
         self.account.save(<- relayer, to: BandOracle.RelayStoragePath)
         self.account.link<&BandOracle.Relay>(BandOracle.RelayPrivatePath, target: BandOracle.RelayStoragePath)
