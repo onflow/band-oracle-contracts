@@ -27,45 +27,45 @@ event emitted by the BandOracle contract. When a symbol used by the dapp has it'
 transaction should be run to update price quotes within the contract. In the current example calling the
 `updateTokenFlowPrice()` method from the admin resource achieves this.
 **/
-pub contract BandExampleConsumerToken: FungibleToken {
+access(all) contract BandExampleConsumerToken: FungibleToken {
 
     // The USD price is determined by the admin, then the equivalent Flow price is 
     // calculated by getting the FLOW/USD rate from the band oracle
-    pub var tokenUSDPrice: UFix64
-    pub var tokenFlowPrice: UFix64
+    access(all) var tokenUSDPrice: UFix64
+    access(all) var tokenFlowPrice: UFix64
     
     // The funds collecting minting tokens will be stored here. This vault will be 
     // also used to pay for the oracle fees.
-    pub let flowTreasure: @FungibleToken.Vault
+    access(all) let flowTreasure: @FungibleToken.Vault
 
     // Total supply of tokens in existence
-    pub var totalSupply: UFix64
+    access(all) var totalSupply: UFix64
 
     // Paths
-    pub let VaultStoragePath: StoragePath
-    pub let ReceiverPublicPath: PublicPath
-    pub let BalancePublicPath: PublicPath
+    access(all) let VaultStoragePath: StoragePath
+    access(all) let ReceiverPublicPath: PublicPath
+    access(all) let BalancePublicPath: PublicPath
 
     // Event that is emitted when the contract is created
-    pub event TokensInitialized(initialSupply: UFix64)
+    access(all) event TokensInitialized(initialSupply: UFix64)
 
     // Event that is emitted when tokens are withdrawn from a Vault
-    pub event TokensWithdrawn(amount: UFix64, from: Address?)
+    access(all) event TokensWithdrawn(amount: UFix64, from: Address?)
 
     // Event that is emitted when tokens are deposited to a Vault
-    pub event TokensDeposited(amount: UFix64, to: Address?)
+    access(all) event TokensDeposited(amount: UFix64, to: Address?)
 
     // Event that is emitted when new tokens are minted
-    pub event TokensMinted(amount: UFix64)
+    access(all) event TokensMinted(amount: UFix64)
 
     // Event that is emitted when tokens are destroyed
-    pub event TokensBurned(amount: UFix64)
+    access(all) event TokensBurned(amount: UFix64)
 
     // Event that is emitted when a new minter resource is created
-    pub event MinterCreated()
+    access(all) event MinterCreated()
 
     // Event that is emitted when a new burner resource is created
-    pub event BurnerCreated()
+    access(all) event BurnerCreated()
 
     // Vault
     //
@@ -79,10 +79,10 @@ pub contract BandExampleConsumerToken: FungibleToken {
     // out of thin air. A special Minter resource needs to be defined to mint
     // new tokens.
     //
-    pub resource Vault: FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance {
+    access(all) resource Vault: FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance {
 
         // holds the balance of a users tokens
-        pub var balance: UFix64
+        access(all) var balance: UFix64
 
         // initialize the balance at resource creation time
         init(balance: UFix64) {
@@ -98,7 +98,7 @@ pub contract BandExampleConsumerToken: FungibleToken {
         // created Vault to the context that called so it can be deposited
         // elsewhere.
         //
-        pub fun withdraw(amount: UFix64): @FungibleToken.Vault {
+        access(all) fun withdraw(amount: UFix64): @FungibleToken.Vault {
             self.balance = self.balance - amount
             emit TokensWithdrawn(amount: amount, from: self.owner?.address)
             return <-create Vault(balance: amount)
@@ -111,7 +111,7 @@ pub contract BandExampleConsumerToken: FungibleToken {
         // It is allowed to destroy the sent Vault because the Vault
         // was a temporary holder of the tokens. The Vault's balance has
         // been consumed and therefore can be destroyed.
-        pub fun deposit(from: @FungibleToken.Vault) {
+        access(all) fun deposit(from: @FungibleToken.Vault) {
             let vault <- from as! @BandExampleConsumerToken.Vault
             self.balance = self.balance + vault.balance
             emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -133,19 +133,19 @@ pub contract BandExampleConsumerToken: FungibleToken {
     // and store the returned Vault in their storage in order to allow their
     // account to be able to receive deposits of this token type.
     //
-    pub fun createEmptyVault(): @FungibleToken.Vault {
+    access(all) fun createEmptyVault(): @FungibleToken.Vault {
         return <-create Vault(balance: 0.0)
     }
 
     // Admin resource that allows to set the token price
-    pub resource Administrator {
+    access(all) resource Administrator {
         
-        pub fun setNewTokensUSDPrice (price: UFix64) {
+        access(all) fun setNewTokensUSDPrice (price: UFix64) {
             BandExampleConsumerToken.tokenUSDPrice = price
             BandExampleConsumerToken.updateTokenFlowPrice()
         }
 
-        pub fun updateTokenFlowPrice () {
+        access(all) fun updateTokenFlowPrice () {
             BandExampleConsumerToken.updateTokenFlowPrice()
         }
 
@@ -161,7 +161,7 @@ pub contract BandExampleConsumerToken: FungibleToken {
 
     // Public function that allows anyone to mint themselves a bunch of tokens, in 
     // exchange of the needed amount of Flow tokens.
-    pub fun swapTokens(maxPrice: UFix64, payment: @FungibleToken.Vault): @BandExampleConsumerToken.Vault {
+    access(all) fun swapTokens(maxPrice: UFix64, payment: @FungibleToken.Vault): @BandExampleConsumerToken.Vault {
         pre {
             self.tokenFlowPrice < maxPrice: "Current token price is higher than the maximum desired price,"
         }
