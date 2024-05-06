@@ -4,7 +4,7 @@ transaction {
 
     prepare (oracleAdmin: AuthAccount, collector: AuthAccount){
         
-        let adminRef = oracleAdmin.borrow<&{BandOracle.OracleAdmin}>(from: BandOracle.OracleAdminStoragePath) ??
+        let adminRef = oracleAdmin.capabilities.borrow<&{BandOracle.OracleAdmin}>(from: BandOracle.OracleAdminStoragePath) ??
             panic("Cannot borrow oracle admin")
 
         let feeCollector <- adminRef.createNewFeeCollector()

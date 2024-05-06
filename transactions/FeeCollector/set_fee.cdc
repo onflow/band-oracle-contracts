@@ -4,7 +4,7 @@ transaction (fee: UFix64) {
     let feeCollector: &BandOracle.FeeCollector
 
     prepare (collector: AuthAccount){
-        self.feeCollector = collector.borrow<&BandOracle.FeeCollector>(from: BandOracle.FeeCollectorStoragePath)
+        self.feeCollector = collector.capabilities.borrow<&BandOracle.FeeCollector>(from: BandOracle.FeeCollectorStoragePath)
             ?? panic("Cannot load fee collector from maintainer storage")
     }
     execute {

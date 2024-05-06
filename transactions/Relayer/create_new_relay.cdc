@@ -16,6 +16,7 @@ transaction (oracleAdmin: Address) {
         // Save the new relayer resource into the relayer account
         acct.save(<- relayer, to: BandOracle.RelayStoragePath)
         // Link the relayer resource to a private path for using it latter
-        acct.link<&BandOracle.Relay>(BandOracle.RelayPrivatePath, target: BandOracle.RelayStoragePath)
+        let relayPrivatePathCap = acct.capabilities.storage.issue<&BandOracle.Relay>(BandOracle.RelayPrivatePath)
+        acct.capabilities.publish(relayPrivatePathCap, at: BandOracle.RelayStoragePath)
     }
 }
