@@ -112,7 +112,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
         // was a temporary holder of the tokens. The Vault's balance has
         // been consumed and therefore can be destroyed.
         access(all) fun deposit(from: @FungibleToken.Vault) {
-            let vault <- from as! @BandExampleConsumerToken.Vault
+            let vault <- from as @BandExampleConsumerToken.Vault
             self.balance = self.balance + vault.balance
             emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
             vault.balance = 0.0
@@ -165,7 +165,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
         pre {
             self.tokenFlowPrice < maxPrice: "Current token price is higher than the maximum desired price,"
         }
-        let vault <- payment as! @BandExampleConsumerToken.Vault
+        let vault <- payment as @BandExampleConsumerToken.Vault
         let amount = vault.balance / self.tokenFlowPrice
         self.flowTreasure.deposit(from: <-vault)
         self.totalSupply = self.totalSupply + amount
