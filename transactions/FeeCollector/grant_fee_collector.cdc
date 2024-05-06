@@ -2,7 +2,7 @@ import "BandOracle"
 
 transaction {
 
-    prepare (oracleAdmin: AuthAccount, collector: AuthAccount){
+    prepare (oracleAdmin: &Account, collector: &Account){
         
         let adminRef = oracleAdmin.capabilities.borrow<&{BandOracle.OracleAdmin}>(from: BandOracle.OracleAdminStoragePath) ??
             panic("Cannot borrow oracle admin")

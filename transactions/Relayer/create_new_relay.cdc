@@ -1,7 +1,7 @@
 import "BandOracle"
 
 transaction (oracleAdmin: Address) {
-    prepare (acct: AuthAccount){
+    prepare (acct: &Account){
         // Try to claim the published updater capability 
         let updaterCapability = 
             acct.inbox.claim<&{BandOracle.DataUpdater}>(

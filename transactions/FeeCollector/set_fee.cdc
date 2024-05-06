@@ -3,7 +3,7 @@ import "BandOracle"
 transaction (fee: UFix64) {
     let feeCollector: &BandOracle.FeeCollector
 
-    prepare (collector: AuthAccount){
+    prepare (collector: &Account){
         self.feeCollector = collector.capabilities.borrow<&BandOracle.FeeCollector>(from: BandOracle.FeeCollectorStoragePath)
             ?? panic("Cannot load fee collector from maintainer storage")
     }
