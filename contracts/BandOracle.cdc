@@ -425,7 +425,8 @@ access(all) contract BandOracle {
         self.FeeCollectorStoragePath = /storage/BandOracleFeeCollector
         self.dataUpdaterPrivateBasePath = "BandOracleDataUpdater"
         self.account.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
-        self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
+        let adminCap = self.account.capabilities.storage.issue<&{OracleAdmin}>(self.OracleAdminPrivatePath);
+        self.account.capabilities.publish(adminCap, at: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
         self.payments <- FlowToken.createEmptyVault()
         self.fee = 0.0
@@ -438,11 +439,13 @@ access(all) contract BandOracle {
         let oracleAdminRef = self.account.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
             ?? panic("Can't borrow a reference to the Oracle Admin")
         let dataUpdaterPrivatePath = oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: self.account.address)
-        self.account.link<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath, target: BandOracle.OracleAdminStoragePath)
+        let dataUpdaterCap = self.account.capabilities.storage.issue<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
+        self.account.capabilities.publish(dataUpdarterCap, at: BandOracle.OracleAdminStoragePath)
             ?? panic ("Data Updater capability for admin creation failed")
         let updaterCapability = self.account.capabilities.borrow<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
         let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
         self.account.save(<- relayer, to: BandOracle.RelayStoragePath)
-        self.account.link<&BandOracle.Relay>(BandOracle.RelayPrivatePath, target: BandOracle.RelayStoragePath)
+        let relayCap = self.account.capabilities.storage.issue<&BandOracle.Relay>(BandOracle.RelayPrivatePath)
+        self.account.capabilities.publish(relayCap, at: BandOracle.RelayStoragePath)
     }
 }
