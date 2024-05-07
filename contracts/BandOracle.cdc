@@ -10,11 +10,9 @@ access(all) contract BandOracle {
 
     // OracleAdmin resource paths.
     access(all) let OracleAdminStoragePath: StoragePath
-    access(all) let OracleAdminPrivatePath: PrivatePath
 
     // Relay resource paths.
     access(all) let RelayStoragePath: StoragePath
-    access(all) let RelayPrivatePath: PrivatePath
 
     // FeeCollector resource paths.
     access(all) let FeeCollectorStoragePath: StoragePath
