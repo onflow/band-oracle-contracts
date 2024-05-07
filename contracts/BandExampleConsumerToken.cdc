@@ -29,6 +29,8 @@ transaction should be run to update price quotes within the contract. In the cur
 **/
 access(all) contract BandExampleConsumerToken: FungibleToken {
 
+    access(all) entitlement Update
+    
     // The USD price is determined by the admin, then the equivalent Flow price is 
     // calculated by getting the FLOW/USD rate from the band oracle
     access(all) var tokenUSDPrice: UFix64
@@ -36,7 +38,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
     
     // The funds collecting minting tokens will be stored here. This vault will be 
     // also used to pay for the oracle fees.
-    access(all) let flowTreasure: @FungibleToken.Vault
+    access(self) let flowTreasure: @FungibleToken.Vault
 
     // Total supply of tokens in existence
     access(all) var totalSupply: UFix64
@@ -79,7 +81,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
     // out of thin air. A special Minter resource needs to be defined to mint
     // new tokens.
     //
-    access(all) resource Vault: FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance {
+    access(all) resource Vault: FungibleToken.Vault {
 
         // holds the balance of a users tokens
         access(all) var balance: UFix64
@@ -98,7 +100,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
         // created Vault to the context that called so it can be deposited
         // elsewhere.
         //
-        access(all) fun withdraw(amount: UFix64): @FungibleToken.Vault {
+        access(FungibleToken.Withdraw) fun withdraw(amount: UFix64): @{FungibleToken.Vault} {
             self.balance = self.balance - amount
             emit TokensWithdrawn(amount: amount, from: self.owner?.address)
             return <-create Vault(balance: amount)
@@ -135,15 +137,46 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
         return <-create Vault(balance: 0.0)
     }
 
+        /// Called when a fungible token is burned via the `Burner.burn()` method
+        access(contract) fun burnCallback() {
+            if self.balance > 0.0 {
+                BandExampleConsumerToken.totalSupply = BandExampleConsumerToken.totalSupply - self.balance
+            }
+            self.balance = 0.0
+        }
+
+        access(all) view fun getViews(): [Type] {
+            return BandExampleConsumerToken.getContractViews(resourceType: nil)
+        }
+
+        access(all) fun resolveView(_ view: Type): AnyStruct? {
+            return BandExampleConsumerToken.resolveContractView(resourceType: nil, viewType: view)
+        }
+
+        /// getSupportedVaultTypes optionally returns a list of vault types that this receiver accepts
+        access(all) view fun getSupportedVaultTypes(): {Type: Bool} {
+            let supportedTypes: {Type: Bool} = {}
+            supportedTypes[self.getType()] = true
+            return supportedTypes
+        }
+
+        access(all) view fun isSupportedVaultType(type: Type): Bool {
+            return self.getSupportedVaultTypes()[type] ?? false
+        }
+
+        /// Asks if the amount can be withdrawn from this vault
+        access(all) view fun isAvailableToWithdraw(amount: UFix64): Bool {
+            return amount <= self.balance
+        }
     // Admin resource that allows to set the token price
     access(all) resource Administrator {
         
-        access(all) fun setNewTokensUSDPrice (price: UFix64) {
+        access(Update) fun setNewTokensUSDPrice (price: UFix64) {
             BandExampleConsumerToken.tokenUSDPrice = price
             BandExampleConsumerToken.updateTokenFlowPrice()
         }
 
-        access(all) fun updateTokenFlowPrice () {
+        access(Update) fun updateTokenFlowPrice () {
             BandExampleConsumerToken.updateTokenFlowPrice()
         }
 
