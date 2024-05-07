@@ -8,16 +8,65 @@
 				"testing": "000000000000006"
 			}
 		},
+		"Burner": {
+			"source": "./contracts/utility/Burner.cdc",
+			"aliases": {
+				"emulator": "0xf8d6e0586b0a20c7",
+				"testing": "0x0000000000000001",
+				"testnet": "0x9a0766d93b6608b7"
+			}
+		},
 		"FlowToken": {
 			"source": "contracts/utility/FlowToken.cdc",
 			"aliases": {
-				"emulator": "0ae53cb6e3f42a79"
+				"emulator": "0ae53cb6e3f42a79",
+				"mainnet": "1654653399040a61",
+				"testnet": "7e60df042a9c0868"
+			}
+		},
+		"FungibleTokenMetadataViews": {
+			"source": "./contracts/utility/FungibleTokenMetadataViews.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testing": "0000000000000002",
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"FungibleToken": {
 			"source": "contracts/utility/FungibleToken.cdc",
 			"aliases": {
-				"emulator": "ee82856bf20e2aa6"
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testing": "0000000000000002",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"MetadataViews": {
+			"source": "./contracts/utility/MetadataViews.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testing": "0000000000000001",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "./contracts/utility/NonFungibleToken.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testing": "0000000000000001",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"ViewResolver": {
+			"source": "./contracts/utility/ViewResolver.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "1d7e57aa55817448",
+				"testing": "0000000000000001",
+				"testnet": "631e88ae7f1d7c20"
 			}
 		}
 	},
@@ -40,6 +89,14 @@
 			"address": "fd43f9148d4b725d",
 			"key": "2b42bf501bb3e07e9332b0cda9e68c18d0591cdc54aa701fb111991adf1a99fe"
 		},
+		"emulator-flow": {
+			"address": "0ae53cb6e3f42a79",
+			"key": "c1e4c9d9dca9e4d5e9b0b5a9a8e8b9c5d6f4a8b9c5d6f4a8b9c5d6f4a8b9c5d6"
+		},
+		"emulator-ft": {
+			"address": "ee82856bf20e2aa6",
+			"key": "686779d775e5fcbf8d2f4a85cb4c53525d02b7ef53230d180fc16f35d9b7d025"
+		},
 		"testnet-oracle": {
 			"address": "4772ee0aba864de9",
 			"key": {
@@ -58,7 +115,17 @@
 	"deployments": {
 		"emulator": {
 			"default": [
+				"NonFungibleToken",
+				"Burner",
+				"MetadataViews",
+				"ViewResolver",
 				"BandOracle"
+			],
+			"emulator-flow": [
+				"FlowToken"
+			],
+			"emulator-ft": [
+				"FungibleToken"
 			]
 		},
 		"testnet": {
