@@ -1,0 +1,6 @@
+*.pkey
+*.pem
+*.private
+coverage.json
+coverage.lcov
+.idea
