@@ -17,6 +17,10 @@ access(all) contract BandOracle {
     // FeeCollector resource paths.
     access(all) let FeeCollectorStoragePath: StoragePath
 
+    // Entitlements
+    access(all) entitlement Fees
+    access(all) entitlement Update
+    access(all) entitlement Remove
 
     /// Fields
     
