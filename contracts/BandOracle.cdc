@@ -10,9 +10,11 @@ access(all) contract BandOracle {
 
     // OracleAdmin resource paths.
     access(all) let OracleAdminStoragePath: StoragePath
+    access(contract) let OracleAdminPrivatePath: PrivatePath
 
     // Relay resource paths.
     access(all) let RelayStoragePath: StoragePath
+    access(contract) let RelayPrivatePath: PrivatePath
 
     // FeeCollector resource paths.
     access(all) let FeeCollectorStoragePath: StoragePath
@@ -20,7 +22,7 @@ access(all) contract BandOracle {
     // Entitlements
     access(all) entitlement Fees
     access(all) entitlement Update
-    access(all) entitlement Remove
+    access(all) entitlement RemoveSymbol
 
     /// Fields
     
@@ -37,10 +39,13 @@ access(all) contract BandOracle {
     access(all) let e9: UInt256
 
     // Vault for storing service fees.
-    access(contract) let payments: @FungibleToken.Vault
+    access(contract) let payments: @{FungibleToken.Vault}
 
     // Service fee per request.
     access(contract) var fee: UFix64
+
+
+
 
 
     /// Events
@@ -98,8 +103,8 @@ access(all) contract BandOracle {
     ///
     access(all) resource interface OracleAdmin {
         access(all) fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath
-        access(Remove) fun removeSymbol (symbol: String)
-        access(Fee) fun createNewFeeCollector (): @BandOracle.FeeCollector
+        access(RemoveSymbol) fun removeSymbol (symbol: String)
+        access(Fees) fun createNewFeeCollector (): @BandOracle.FeeCollector
     }
 
     /// Relayer operations.
@@ -137,7 +142,7 @@ access(all) contract BandOracle {
         ///
         /// @param symbol: The string representing the symbol to be removed from the contract.
         ///
-        access(Remove) fun removeSymbol (symbol: String) {
+        access(RemoveSymbol) fun removeSymbol (symbol: String) {
             BandOracle.removeSymbol(symbol: symbol)
         }
         
@@ -172,7 +177,7 @@ access(all) contract BandOracle {
         ///
         /// @return The `FeeCollector` resource
         ///
-        access(Fee) fun createNewFeeCollector (): @FeeCollector {
+        access(Fees) fun createNewFeeCollector (): @FeeCollector {
             return <- create FeeCollector()
         }
 
@@ -209,7 +214,7 @@ access(all) contract BandOracle {
             updaterRef.forceUpdateData(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID, relayerID: self.uuid)
         }
 
-        init(updaterCapability: Capability<&{DataUpdater}>) {
+        init(updaterCapability: Capability<auth(Update)&{DataUpdater}>) {
             self.updaterCapability = updaterCapability
             let updaterRef = self.updaterCapability.borrow() 
                 ?? panic ("Can't borrow linked updater")
@@ -224,7 +229,7 @@ access(all) contract BandOracle {
         ///
         /// @param fee: The amount of Flow tokens.
         ///
-        access(Fee) fun setFee (fee: UFix64) {
+        access(Fees) fun setFee (fee: UFix64) {
             BandOracle.setFee(fee: fee)
         }
 
@@ -232,7 +237,7 @@ access(all) contract BandOracle {
         /// 
         /// @return A vault containing the funds obtained for the oracle use.
         ///
-        access(Fee) fun collectFees (): @FungibleToken.Vault {
+        access(Fees) fun collectFees (): @{FungibleToken.Vault} {
             return <- BandOracle.collectFees()
         }
 
@@ -332,8 +337,8 @@ access(all) contract BandOracle {
     ///
     /// @return A flow token vault with the collected fees so far.
     ///
-    access(contract) fun collectFees (): @FungibleToken.Vault {
-        let collectedFees <- FlowToken.createEmptyVault()
+    access(contract) fun collectFees (): @{FungibleToken.Vault} {
+        let collectedFees <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
         collectedFees.deposit(from: <- BandOracle.payments.withdraw(amount: BandOracle.payments.balance))
         return <- collectedFees
     }
@@ -380,7 +385,7 @@ access(all) contract BandOracle {
     /// @param payment: Flow token vault containing the service fee.
     /// @return The `ReferenceData` containing the requested data.
     ///
-    access(all) view fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @FungibleToken.Vault): ReferenceData {
+    access(all) view fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @{FungibleToken.Vault}): ReferenceData {
         pre {
             BandOracle._getRefData(symbol: baseSymbol) != nil: "No quotes for base symbol"
             BandOracle._getRefData(symbol: quoteSymbol) != nil: "No quotes for base symbol"
@@ -430,7 +435,7 @@ access(all) contract BandOracle {
         let adminCap = self.account.capabilities.storage.issue<&{OracleAdmin}>(self.OracleAdminPrivatePath);
         self.account.capabilities.publish(adminCap, at: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
-        self.payments <- FlowToken.createEmptyVault()
+        self.payments <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
         self.fee = 0.0
         self.e18 = 1_000_000_000_000_000_000
         self.e9 = 1_000_000_000
@@ -438,7 +443,7 @@ access(all) contract BandOracle {
         // The admin could decide to build a transaction borrowing the whole BandOracleAdmin
         // resource and call updateData methods bypassing relayData methods but we are explicitly
         // discouraging that by giving the admin a regular relay resource on contract deployment.
-        let oracleAdminRef = self.account.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
+        let oracleAdminRef = self.account.storage.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
             ?? panic("Can't borrow a reference to the Oracle Admin")
         let dataUpdaterPrivatePath = oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: self.account.address)
         let dataUpdaterCap = self.account.capabilities.storage.issue<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
