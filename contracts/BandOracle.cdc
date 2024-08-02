@@ -355,7 +355,7 @@ access(all) contract BandOracle {
     /// @param relayer: Address of the account who will be granted with a relayer.
     /// @return The capability name.
     ///
-    access(all) fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
+    access(all) view fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
         // Create the string that will form the private path concatenating the base
         // path and the relayer identifying address.
         let capabilityName = 
@@ -367,7 +367,7 @@ access(all) contract BandOracle {
     ///
     /// @return The fee to be charged for every request made to the oracle.
     ///
-    access(all) fun getFee (): UFix64 {
+    access(all) view fun getFee (): UFix64 {
         return BandOracle.fee
     }
 
@@ -397,7 +397,7 @@ access(all) contract BandOracle {
     /// @param rate: The symbol rate as an integer.
     /// @return The symbol rate as a decimal.
     ///
-    access(all) fun e18ToFixedPoint (rate: UInt256): UFix64 {
+    access(all) view fun e18ToFixedPoint (rate: UInt256): UFix64 {
         return  (
                     UFix64(
                         rate / BandOracle.e18
