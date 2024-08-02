@@ -4,16 +4,16 @@ import "FungibleToken"
 
 transaction (baseSymbol: String, quoteSymbol: String) {
     
-    let payment: @FungibleToken.Vault
+    let payment: @{FungibleToken.Vault}
 
-    prepare (acct: AuthAccount){
+    prepare (acct: auth(Storage)&Account){
 
-        let vault <- acct.load<@FlowToken.Vault>(from: /storage/flowTokenVault) ??
+        let vault <- acct.storage.load<@FlowToken.Vault>(from: /storage/flowTokenVault) ??
             panic("Cannot load account flow vault")
         
         self.payment <- vault.withdraw(amount: BandOracle.getFee())
         
-        acct.save(<- vault, to: /storage/flowTokenVault)
+        acct.storage.save(<- vault, to: /storage/flowTokenVault)
 
     }
 

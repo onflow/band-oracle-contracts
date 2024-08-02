@@ -2,14 +2,14 @@ import "BandOracle"
 
 transaction {
 
-    prepare (oracleAdmin: AuthAccount, collector: AuthAccount){
+    prepare (oracleAdmin: auth(BorrowValue)&Account, collector: auth(SaveValue)&Account){
         
-        let adminRef = oracleAdmin.borrow<&{BandOracle.OracleAdmin}>(from: BandOracle.OracleAdminStoragePath) ??
+        let adminRef = oracleAdmin.storage.borrow<&{BandOracle.OracleAdmin}>(from: BandOracle.OracleAdminStoragePath) ??
             panic("Cannot borrow oracle admin")
 
         let feeCollector <- adminRef.createNewFeeCollector()
     
-        collector.save(<- feeCollector, to: BandOracle.FeeCollectorStoragePath)
+        collector.storage.save(<- feeCollector, to: BandOracle.FeeCollectorStoragePath)
     }
 
 }

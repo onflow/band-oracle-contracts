@@ -3,7 +3,7 @@ import "BandOracle"
 transaction (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
     let relayRef: &BandOracle.Relay
 
-    prepare (acct: AuthAccount){
+    prepare (acct: &Account){
         // Get a capability to the relayer resource
         let relayCapability = 
             acct.getCapability<&BandOracle.Relay>(BandOracle.RelayPrivatePath)
