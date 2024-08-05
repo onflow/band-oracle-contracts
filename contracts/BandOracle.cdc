@@ -378,14 +378,16 @@ access(all) contract BandOracle {
     ///
     access(all) fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @{FungibleToken.Vault}): ReferenceData {
         pre {
-            BandOracle._getRefData(symbol: baseSymbol) != nil: "No quotes for base symbol"
-            BandOracle._getRefData(symbol: quoteSymbol) != nil: "No quotes for base symbol"
             payment.balance >= BandOracle.fee : "Insufficient balance"
         }
-        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)!
-        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
-        BandOracle.payments.deposit(from: <- payment)
-        return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
+        if (BandOracle._getRefData(symbol: baseSymbol) != nil && BandOracle._getRefData(symbol: quoteSymbol) != nil){
+            let baseRefData = BandOracle._getRefData(symbol: baseSymbol)!
+            let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
+            BandOracle.payments.deposit(from: <- payment)
+            return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
+        } else {
+            panic("Cannot get a quote for the requested symbol pair.")
+        }
     }
 
     /// Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
