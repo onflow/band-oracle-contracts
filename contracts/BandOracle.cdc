@@ -8,15 +8,13 @@ access(all) contract BandOracle {
     
     /// Paths
 
-    // OracleAdmin resource paths.
+    // OracleAdmin resource path.
     access(all) let OracleAdminStoragePath: StoragePath
-    access(contract) let OracleAdminPrivatePath: PrivatePath
 
-    // Relay resource paths.
+    // Relay resource path.
     access(all) let RelayStoragePath: StoragePath
-    access(contract) let RelayPrivatePath: PrivatePath
 
-    // FeeCollector resource paths.
+    // FeeCollector resource path.
     access(all) let FeeCollectorStoragePath: StoragePath
 
 
@@ -419,13 +417,10 @@ access(all) contract BandOracle {
 
     init() {
         self.OracleAdminStoragePath = /storage/BandOracleAdmin
-        self.OracleAdminPrivatePath = /private/BandOracleAdmin
         self.RelayStoragePath = /storage/BandOracleRelay
-        self.RelayPrivatePath = /private/BandOracleRelay
         self.FeeCollectorStoragePath = /storage/BandOracleFeeCollector
         self.dataUpdaterPrivateBasePath = "BandOracleDataUpdater"
         self.account.storage.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
-        self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
         self.payments <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
         self.fee = 0.0
@@ -438,11 +433,8 @@ access(all) contract BandOracle {
         let oracleAdminRef = self.account.storage.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
             ?? panic("Can't borrow a reference to the Oracle Admin")
         let dataUpdaterPrivatePath = oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: self.account.address)
-        self.account.link<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath, target: BandOracle.OracleAdminStoragePath)
-            ?? panic ("Data Updater capability for admin creation failed")
-        let updaterCapability = self.account.capabilities.get<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
+        let updaterCapability = self.account.capabilities.storage.issue<&{BandOracle.DataUpdater}>(BandOracle.OracleAdminStoragePath)
         let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
         self.account.storage.save(<- relayer, to: BandOracle.RelayStoragePath)
-        self.account.link<&BandOracle.Relay>(BandOracle.RelayPrivatePath, target: BandOracle.RelayStoragePath)
     }
 }
