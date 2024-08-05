@@ -3,13 +3,10 @@ import "BandOracle"
 transaction (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
     let relayRef: &BandOracle.Relay
 
-    prepare (acct: &Account){
-        // Get a capability to the relayer resource
-        let relayCapability = 
-            acct.getCapability<&BandOracle.Relay>(BandOracle.RelayPrivatePath)
-        // And borrow a reference to it
-        self.relayRef = relayCapability.borrow()
-            ?? panic ("Cannot borrow reference to relay resource")
+    prepare (acct: auth(BorrowValue)&Account){
+        // Get a reference to the relayer resource from storage
+        self.relayRef = acct.storage.borrow<&BandOracle.Relay>(from: BandOracle.RelayStoragePath) ??
+            panic("Cannot borrow reference to relay resource")
     }
 
     execute {

@@ -38,6 +38,9 @@ access(all) contract BandOracle {
     // Service fee per request.
     access(contract) var fee: UFix64
 
+    // Mapping of Relayer address to their issued capability ID
+    access(contract) let relayersCapabilityID: {Address: UInt64}
+
 
     /// Events
     
@@ -93,7 +96,8 @@ access(all) contract BandOracle {
     /// Admin only operations.
     ///
     access(all) resource interface OracleAdmin {
-        access(all) fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath
+        access(all) fun setRelayerCapabilityID (relayer: Address, capabilityID: UInt64)
+        access(all) fun getUpdaterCapabilityIDFromAddress (relayer: Address): UInt64?
         access(all) fun removeSymbol (symbol: String)
         access(all) fun createNewFeeCollector (): @BandOracle.FeeCollector
     }
@@ -112,21 +116,22 @@ access(all) contract BandOracle {
     ///
     access(all) resource BandOracleAdmin: OracleAdmin, DataUpdater {
 
-        /// Auxiliary method to ensure that the formation of the capability path that 
-        /// identifies relayers is done in a uniform way.
+        /// Stores in contract the data updater capability ID along with the address
+        /// of the relayer who got the capability
+        ///
+        /// @param relayer: The entitled relayer account address
+        /// @param capabilityID: The ID of the data updater capability
+        ///
+        access(all) fun setRelayerCapabilityID (relayer: Address, capabilityID: UInt64) {
+            BandOracle.relayersCapabilityID[relayer] = capabilityID
+        }
+
+        /// Method to retrieve the data updater capability ID from the relayer
         ///
         /// @param relayer: The entitled relayer account address
         ///
-        access(all) fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath {
-            // Create the string that will form the private path concatenating the base
-            // path and the relayer identifying address
-            let privatePathString = 
-                BandOracle.getUpdaterCapabilityNameFromAddress(relayer: relayer)
-            // Attempt to create the private path using the identifier
-            let dataUpdaterPrivatePath = 
-                PrivatePath(identifier: privatePathString) 
-                ?? panic("Error while creating data updater capability private path")
-            return dataUpdaterPrivatePath
+        access(all) fun getUpdaterCapabilityIDFromAddress (relayer: Address): UInt64? {
+            return BandOracle.relayersCapabilityID[relayer]
         }
 
         /// Removes a symbol and its quotes from the contract storage.
@@ -424,6 +429,7 @@ access(all) contract BandOracle {
         self.dataUpdaterPrivateBasePath = "BandOracleDataUpdater"
         self.account.storage.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
+        self.relayersCapabilityID = {}
         self.payments <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
         self.fee = 0.0
         self.e18 = 1_000_000_000_000_000_000
@@ -434,7 +440,6 @@ access(all) contract BandOracle {
         // discouraging that by giving the admin a regular relay resource on contract deployment.
         let oracleAdminRef = self.account.storage.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
             ?? panic("Can't borrow a reference to the Oracle Admin")
-        let dataUpdaterPrivatePath = oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: self.account.address)
         let updaterCapability = self.account.capabilities.storage.issue<&{BandOracle.DataUpdater}>(BandOracle.OracleAdminStoragePath)
         let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
         self.account.storage.save(<- relayer, to: BandOracle.RelayStoragePath)
