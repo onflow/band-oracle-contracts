@@ -74,10 +74,10 @@ access(all) fun testRelayUpdatedQuotes () {
     Test.expect(txResult, Test.beSucceeded())
 
     let symbolsUpdatedEvents = Test.eventsOfType(Type<BandOracle.BandOracleSymbolsUpdated>())
-    let event = symbolsUpdatedEvents[1] as! BandOracle.BandOracleSymbolsUpdated
-    log(event)
-    Test.assertEqual(["BTC","FLOW"], event.symbols)
-    Test.assertEqual(1 as UInt64, event.requestID)
+    let evento = symbolsUpdatedEvents[1] as! BandOracle.BandOracleSymbolsUpdated
+    log(evento)
+    Test.assertEqual(["BTC","FLOW"], evento.symbols)
+    Test.assertEqual(1 as UInt64, evento.requestID)
 }
 
 access(all) fun testRelayOlderUpdatedQuotes () {
@@ -89,10 +89,10 @@ access(all) fun testRelayOlderUpdatedQuotes () {
     Test.expect(txResult, Test.beSucceeded())
 
     let symbolsUpdatedEvents = Test.eventsOfType(Type<BandOracle.BandOracleSymbolsUpdated>())
-    let event = symbolsUpdatedEvents[2] as! BandOracle.BandOracleSymbolsUpdated
-    log(event)
-    Test.assertEqual([] as [String], event.symbols)
-    Test.assertEqual(2 as UInt64, event.requestID)
+    let evento = symbolsUpdatedEvents[2] as! BandOracle.BandOracleSymbolsUpdated
+    log(evento)
+    Test.assertEqual([] as [String], evento.symbols)
+    Test.assertEqual(2 as UInt64, evento.requestID)
 }
 
 access(all) fun testForceRelayQuotes () {
@@ -104,9 +104,9 @@ access(all) fun testForceRelayQuotes () {
     Test.expect(txResult, Test.beSucceeded())
 
     let symbolsUpdatedEvents = Test.eventsOfType(Type<BandOracle.BandOracleSymbolsUpdated>())
-    let event = symbolsUpdatedEvents[3] as! BandOracle.BandOracleSymbolsUpdated
-    Test.assertEqual(["BTC","FLOW"], event.symbols)
-    Test.assertEqual(3 as UInt64, event.requestID)
+    let evento = symbolsUpdatedEvents[3] as! BandOracle.BandOracleSymbolsUpdated
+    Test.assertEqual(["BTC","FLOW"], evento.symbols)
+    Test.assertEqual(3 as UInt64, evento.requestID)
 }
 
 access(all) fun testSetFee () {
