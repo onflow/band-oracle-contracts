@@ -17,7 +17,9 @@ jobs:
     - name: Install Flow cli
       run: |
         sudo sh -ci "$(curl -fsSL https://raw.githubusercontent.com/onflow/flow-cli/master/install.sh)"
+        echo "/root/.local/bin" >> $GITHUB_PATH
 
     - name: Run Tests
       run: |
+        set -e
         flow-c1 test test/band_oracle_tests.cdc
