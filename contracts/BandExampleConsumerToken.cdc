@@ -98,7 +98,7 @@ access(all) contract BandExampleConsumerToken: FungibleToken {
         // created Vault to the context that called so it can be deposited
         // elsewhere.
         //
-        access(all) fun withdraw(amount: UFix64): @{FungibleToken.Vault} {
+        access(FungibleToken.Withdraw) fun withdraw(amount: UFix64): @{FungibleToken.Vault} {
             self.balance = self.balance - amount
             emit TokensWithdrawn(amount: amount, from: self.owner?.address)
             return <-create Vault(balance: amount)
