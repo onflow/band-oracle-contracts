@@ -6,7 +6,7 @@ transaction (baseSymbol: String, quoteSymbol: String) {
     
     let payment: @{FungibleToken.Vault}
 
-    prepare (acct: auth(Storage)&Account){
+    prepare (acct: auth(BorrowValue)&Account){
 
         let vault <- acct.storage.load<@FlowToken.Vault>(from: /storage/flowTokenVault) ??
             panic("Cannot load account flow vault")
