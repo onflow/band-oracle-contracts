@@ -362,7 +362,7 @@ access(all) contract BandOracle {
         // Create the string that will form the private path concatenating the base
         // path and the relayer identifying address.
         let capabilityName = 
-            BandOracle.dataUpdaterPrivateBasePath.concat(relayer.toString())
+            BandOracle.dataUpdaterBasePath.concat(relayer.toString())
         return capabilityName
     }
 
