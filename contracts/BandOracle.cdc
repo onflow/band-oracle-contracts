@@ -21,7 +21,7 @@ access(all) contract BandOracle {
     /// Fields
     
     // String as base private path for data updater capabilities.
-    access(contract) let dataUpdaterPrivateBasePath: String
+    access(contract) let dataUpdaterBasePath: String
 
     // Mapping from symbol to data struct.
     access(contract) let symbolsRefData: {String: RefData}
@@ -426,7 +426,7 @@ access(all) contract BandOracle {
         self.OracleAdminStoragePath = /storage/BandOracleAdmin
         self.RelayStoragePath = /storage/BandOracleRelay
         self.FeeCollectorStoragePath = /storage/BandOracleFeeCollector
-        self.dataUpdaterPrivateBasePath = "BandOracleDataUpdater"
+        self.dataUpdaterBasePath = "BandOracleDataUpdater_"
         self.account.storage.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
         self.relayersCapabilityID = {}
