@@ -8,8 +8,8 @@ transaction (baseSymbol: String, quoteSymbol: String) {
 
     prepare (acct: auth(BorrowValue)&Account){
 
-        let vault <- acct.storage.load<@FlowToken.Vault>(from: /storage/flowTokenVault) ??
-            panic("Cannot load account flow vault")
+        let vault <- acct.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(from: /storage/flowTokenVault) ??
+            panic("Cannot borrow reference to signer's FLOW vault")
         
         self.payment <- vault.withdraw(amount: BandOracle.getFee())
         
