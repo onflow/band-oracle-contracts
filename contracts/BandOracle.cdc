@@ -126,6 +126,15 @@ access(all) contract BandOracle {
             BandOracle.relayersCapabilityID[relayer] = capabilityID
         }
 
+        /// Deletes a relayer's data updater capability from the contract storage
+        ///
+        /// @param relayer: The entitled relayer account address
+        /// @return: The ID of the data updater capability along with the relayer address
+        ///
+        access(all) fun revokeRelayer (relayer: Address): {Address: UInt64} {
+            return BandOracle.relayersCapabilityID.remove(key: relayer)
+        }
+
         /// Method to retrieve the data updater capability ID from the relayer
         ///
         /// @param relayer: The entitled relayer account address
