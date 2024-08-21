@@ -10,8 +10,7 @@ transaction(relayer: Address) {
             let controller = acct.capabilities.storage.getController(byCapabilityID: capabilityID) ??
                 panic("Can't get relayer's data updater capability controller")
             controller.delete()
-            let revokedRelayer =oracleAdminRef.revokeRelayer(relayer: relayer)
-            log(revokedRelayer)
+            oracleAdminRef.revokeRelayer (relayer: relayer)
         } else {
             panic("Address is not a relayer")
         }
