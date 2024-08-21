@@ -18,6 +18,12 @@ jobs:
       run: |
         sudo sh -ci "$(curl -fsSL https://raw.githubusercontent.com/onflow/flow-cli/master/install.sh)"
         echo "/root/.local/bin" >> $GITHUB_PATH
+        export PATH=$PATH:/root/.local/bin
+
+    - name: Debugging Path
+      run: |
+        echo $PATH
+        ls /root/.local/bin
 
     - name: Run Tests
       run: |
