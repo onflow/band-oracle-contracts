@@ -27,7 +27,7 @@ access(all) fun afterEach () {
 
 access(all) fun testSetUpRelayer () {
     let txResult1 = executeTransaction(
-        "../transactions/OracleAdmin/link_and_publish_data_updater_capability.cdc",
+        "../transactions/OracleAdmin/issue_and_publish_data_updater_capability.cdc",
         [relayer.address],
         admin
     )
