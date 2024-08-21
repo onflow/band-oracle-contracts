@@ -11,15 +11,15 @@
 	},
 	"dependencies": {
 		"Burner": {
-			"source": "emulator://f8d6e0586b0a20c7.Burner",
+			"source": "testnet://9a0766d93b6608b7.Burner",
 			"hash": "71af18e227984cd434a3ad00bb2f3618b76482842bae920ee55662c37c8bf331",
 			"aliases": {
-				"emulator": "f8d6e0586b0a20c7"
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"FlowToken": {
-			"source": "emulator://0ae53cb6e3f42a79.FlowToken",
-			"hash": "3a3e9416fdbc1679e2f4995d1f0a892732f2e146dd36d329888b6481b09bd41f",
+			"source": "testnet://7e60df042a9c0868.FlowToken",
+			"hash": "a7b219cf8596c1116aa219bb31535faa79ebf5e02d16fa594acd0398057674e1",
 			"aliases": {
 				"emulator": "0ae53cb6e3f42a79",
 				"mainnet": "1654653399040a61",
@@ -28,8 +28,8 @@
 			}
 		},
 		"FungibleToken": {
-			"source": "emulator://ee82856bf20e2aa6.FungibleToken",
-			"hash": "9d506fa41dfce9925cd46326f0d1c283d194550c95c8beabab64f7de7c3d2d24",
+			"source": "testnet://9a0766d93b6608b7.FungibleToken",
+			"hash": "154d9000cc0b992664c1d315826a4bc47e744fbc7f2e99daf823e5101945042a",
 			"aliases": {
 				"emulator": "ee82856bf20e2aa6",
 				"mainnet": "f233dcee88fe0abe",
@@ -38,15 +38,18 @@
 			}
 		},
 		"FungibleTokenMetadataViews": {
-			"source": "emulator://ee82856bf20e2aa6.FungibleTokenMetadataViews",
-			"hash": "c930c8aee4898dcd6d65a315972b47b568fbe7383a097e6ab0027f7c39e26426",
+			"source": "testnet://9a0766d93b6608b7.FungibleTokenMetadataViews",
+			"hash": "64ec97395c0a3958510ea663563f59d5a6beb7943d69b903db94c11d76be6296",
 			"aliases": {
-				"emulator": "ee82856bf20e2aa6"
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"previewnet": "a0225e7000ac82a9",
+				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"MetadataViews": {
-			"source": "emulator://f8d6e0586b0a20c7.MetadataViews",
-			"hash": "d01b8f10524281ffad1815876dfda737c24a5558a173ec0c75ae18ec908a6373",
+			"source": "testnet://631e88ae7f1d7c20.MetadataViews",
+			"hash": "77e2c3c4afb855af657ecae6611a99acf47a102144c68f4663de42ae700adf5b",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
@@ -55,8 +58,8 @@
 			}
 		},
 		"NonFungibleToken": {
-			"source": "emulator://f8d6e0586b0a20c7.NonFungibleToken",
-			"hash": "d73159deceafcf3d03f3a8811e2fc212e122734e701b3fef6c8c6ebd9ae89552",
+			"source": "testnet://631e88ae7f1d7c20.NonFungibleToken",
+			"hash": "ea1b5fa55b6648064c77a6fd83084a3a0be2a6f4386b3b259c89e4f62ab8f6c0",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
@@ -65,7 +68,7 @@
 			}
 		},
 		"ViewResolver": {
-			"source": "emulator://f8d6e0586b0a20c7.ViewResolver",
+			"source": "testnet://631e88ae7f1d7c20.ViewResolver",
 			"hash": "374a1994046bac9f6228b4843cb32393ef40554df9bd9907a702d098a2987bde",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
@@ -113,9 +116,7 @@
 	"deployments": {
 		"emulator": {
 			"default": [
-				"BandOracle",
-				"Burner",
-				"FungibleTokenMetadataViews"
+				"BandOracle"
 			]
 		},
 		"testnet": {
