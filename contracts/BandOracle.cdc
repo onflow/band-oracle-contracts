@@ -243,8 +243,10 @@ access(all) contract BandOracle {
         /// 
         /// @return A vault containing the funds obtained for the oracle use.
         ///
-        access(all) fun collectFees (): @{FungibleToken.Vault} {
-            return <- BandOracle.collectFees()
+        access(all) fun collectFees (receiver: &{FungibleToken.Receiver}): @{FungibleToken.Vault} {
+            let fees <- BandOracle.collectFees()
+            emit FeesCollected(amount: fees.balance, to: receiver.owner?.address, collectorUUID: self.uuid, collectorAddress: self.owner!.address)
+            receiver.deposit(from: <-fees)
         }
 
     }
