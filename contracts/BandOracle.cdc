@@ -4,63 +4,70 @@ import "FlowToken"
 /// The Flow blockchain contract for the Band Protocol Oracle.
 /// https://docs.bandchain.org/
 ///
-pub contract BandOracle {
+access(all) contract BandOracle {
     
     /// Paths
 
-    // OracleAdmin resource paths.
-    pub let OracleAdminStoragePath: StoragePath
-    pub let OracleAdminPrivatePath: PrivatePath
+    // OracleAdmin resource path.
+    access(all) let OracleAdminStoragePath: StoragePath
 
-    // Relay resource paths.
-    pub let RelayStoragePath: StoragePath
-    pub let RelayPrivatePath: PrivatePath
+    // Relay resource path.
+    access(all) let RelayStoragePath: StoragePath
 
-    // FeeCollector resource paths.
-    pub let FeeCollectorStoragePath: StoragePath
+    // FeeCollector resource path.
+    access(all) let FeeCollectorStoragePath: StoragePath
 
 
     /// Fields
     
     // String as base private path for data updater capabilities.
-    access(contract) let dataUpdaterPrivateBasePath: String
+    access(contract) let dataUpdaterBasePath: String
 
     // Mapping from symbol to data struct.
     access(contract) let symbolsRefData: {String: RefData}
 
     // Aux constant for holding the 10^18 value.
-    pub let e18: UInt256
+    access(all) let e18: UInt256
 
     // Aux constant for holding the 10^9 value.
-    pub let e9: UInt256
+    access(all) let e9: UInt256
 
     // Vault for storing service fees.
-    access(contract) let payments: @FungibleToken.Vault
+    access(contract) let payments: @{FungibleToken.Vault}
 
     // Service fee per request.
     access(contract) var fee: UFix64
+
+    // Mapping of Relayer address to their issued capability ID
+    access(contract) let relayersCapabilityID: {Address: UInt64}
 
 
     /// Events
     
     // Emitted when a relayer updates a set of symbols.
-    pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
+    access(all) event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
 
     // Emitted when a symbol is removed from the oracle.
-    pub event BandOracleSymbolRemoved(symbol: String)
+    access(all) event BandOracleSymbolRemoved(symbol: String)
+
+    // Emitted when fees are collected.
+    access(all) event FeesCollected(amount: UFix64, to: Address?, collectorUUID: UInt64, collectorAddress: Address)
+
+    // Emitted when fees are updated.
+    access(all) event FeeUpdated(old: UFix64, new: UFix64)
 
 
     /// Structs
     
     /// Structure for storing any symbol USD-rate.
     ///
-    pub struct RefData {
+    access(all) struct RefData {
         /// USD-rate, multiplied by 1e9.
-        pub var rate: UInt64
+        access(all) var rate: UInt64
         /// UNIX epoch when data is last resolved. 
-        pub var timestamp: UInt64
+        access(all) var timestamp: UInt64
         /// BandChain request identifier for this data.
-        pub var requestID: UInt64
+        access(all) var requestID: UInt64
 
         init(rate: UInt64, timestamp: UInt64, requestID: UInt64) {
             self.rate = rate
@@ -71,15 +78,15 @@ pub contract BandOracle {
 
     /// Structure for consuming data as quote / base symbols.
     ///
-    pub struct ReferenceData {
+    access(all) struct ReferenceData {
         /// Base / quote symbols rate multiplied by 10^18.
-        pub var integerE18Rate: UInt256
+        access(all) var integerE18Rate: UInt256
         /// Base / quote symbols rate as a fixed point number.
-        pub var fixedPointRate: UFix64
+        access(all) var fixedPointRate: UFix64
         /// UNIX epoch when base data is last resolved. 
-        pub var baseTimestamp: UInt64
+        access(all) var baseTimestamp: UInt64
         /// UNIX epoch when quote data is last resolved. 
-        pub var quoteTimestamp: UInt64
+        access(all) var quoteTimestamp: UInt64
 
         init(rate: UInt256, baseTimestamp: UInt64, quoteTimestamp: UInt64) {
             self.integerE18Rate = rate
@@ -94,48 +101,60 @@ pub contract BandOracle {
 
     /// Admin only operations.
     ///
-    pub resource interface OracleAdmin {
-        pub fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath
-        pub fun removeSymbol (symbol: String)
-        pub fun createNewFeeCollector (): @BandOracle.FeeCollector
+    access(all) resource interface OracleAdmin {
+        access(all) fun setRelayerCapabilityID (relayer: Address, capabilityID: UInt64)
+        access(all) fun removeRelayerCapabilityID (relayer: Address)
+        access(all) fun getUpdaterCapabilityIDFromAddress (relayer: Address): UInt64?
+        access(all) fun removeSymbol (symbol: String)
+        access(all) fun createNewFeeCollector (): @BandOracle.FeeCollector
     }
 
     /// Relayer operations.
     ///
-    pub resource interface DataUpdater {
-        pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+    access(all) resource interface DataUpdater {
+        access(all) fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64, relayerID: UInt64)
-        pub fun forceUpdateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+        access(all) fun forceUpdateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64, relayerID: UInt64)
     }
 
     /// The `BandOracleAdmin` will be created on the contract deployment, and will allow 
     /// the own admin to manage the oracle and the relayers to update prices on it.
     ///
-    pub resource BandOracleAdmin: OracleAdmin, DataUpdater {
+    access(all) resource BandOracleAdmin: OracleAdmin, DataUpdater {
 
-        /// Auxiliary method to ensure that the formation of the capability path that 
-        /// identifies relayers is done in a uniform way.
+        /// Stores in contract the data updater capability ID along with the address
+        /// of the relayer who got the capability
+        ///
+        /// @param relayer: The entitled relayer account address
+        /// @param capabilityID: The ID of the data updater capability
+        ///
+        access(all) fun setRelayerCapabilityID (relayer: Address, capabilityID: UInt64) {
+            BandOracle.relayersCapabilityID[relayer] = capabilityID
+        }
+
+        /// Deletes a relayer's CapabilityID from `BandOracle.relayersCapabilityID` mapping for traceability purposes
+        /// NOTE: Does not revoke the underlying Capability - this must be done in a separate call from the issuing account
         ///
         /// @param relayer: The entitled relayer account address
         ///
-        pub fun getUpdaterCapabilityPathFromAddress (relayer: Address): PrivatePath {
-            // Create the string that will form the private path concatenating the base
-            // path and the relayer identifying address
-            let privatePathString = 
-                BandOracle.getUpdaterCapabilityNameFromAddress(relayer: relayer)
-            // Attempt to create the private path using the identifier
-            let dataUpdaterPrivatePath = 
-                PrivatePath(identifier: privatePathString) 
-                ?? panic("Error while creating data updater capability private path")
-            return dataUpdaterPrivatePath
+        access(all) fun removeRelayerCapabilityID (relayer: Address) {
+            BandOracle.relayersCapabilityID.remove(key: relayer)
+        }
+
+        /// Method to retrieve the data updater capability ID from the relayer
+        ///
+        /// @param relayer: The entitled relayer account address
+        ///
+        access(all) fun getUpdaterCapabilityIDFromAddress (relayer: Address): UInt64? {
+            return BandOracle.relayersCapabilityID[relayer]
         }
 
         /// Removes a symbol and its quotes from the contract storage.
         ///
         /// @param symbol: The string representing the symbol to be removed from the contract.
         ///
-        pub fun removeSymbol (symbol: String) {
+        access(all) fun removeSymbol (symbol: String) {
             BandOracle.removeSymbol(symbol: symbol)
         }
         
@@ -146,7 +165,7 @@ pub contract BandOracle {
         /// @param requestID: The Band Protocol request ID.
         /// @param relayerID: The ID of the relayer carrying the update.
         ///
-        pub fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+        access(all) fun updateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
                             requestID: UInt64, relayerID: UInt64) {
             BandOracle.updateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
                                     requestID: requestID, relayerID: relayerID)
@@ -159,7 +178,7 @@ pub contract BandOracle {
         /// @param requestID: The Band Protocol request ID.
         /// @param relayerID: The ID of the relayer carrying the update.
         ///
-        pub fun forceUpdateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
+        access(all) fun forceUpdateData (symbolsRates: {String: UInt64}, resolveTime: UInt64, 
                                 requestID: UInt64, relayerID: UInt64) {
             BandOracle.forceUpdateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, 
                                     requestID: requestID, relayerID: relayerID)
@@ -170,7 +189,7 @@ pub contract BandOracle {
         ///
         /// @return The `FeeCollector` resource
         ///
-        pub fun createNewFeeCollector (): @FeeCollector {
+        access(all) fun createNewFeeCollector (): @FeeCollector {
             return <- create FeeCollector()
         }
 
@@ -178,7 +197,7 @@ pub contract BandOracle {
 
     /// The resource that will allow an account to make quote updates
     ///
-    pub resource Relay {
+    access(all) resource Relay {
         
         // Capability linked to the OracleAdmin allowing relayers to relay rate updates
         access(self) let updaterCapability: Capability<&{DataUpdater}>
@@ -189,7 +208,7 @@ pub contract BandOracle {
         /// @param resolveTime: The registered time for the rates.
         /// @param requestID: The Band Protocol request ID.
         ///
-        pub fun relayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+        access(all) fun relayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
             let updaterRef = self.updaterCapability.borrow() 
                 ?? panic ("Can't borrow reference to data updater while processing request ".concat(requestID.toString()))
             updaterRef.updateData(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID, relayerID: self.uuid)
@@ -201,7 +220,7 @@ pub contract BandOracle {
         /// @param resolveTime: The registered time for the rates.
         /// @param requestID: The Band Protocol request ID.
         ///
-        pub fun forceRelayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
+        access(all) fun forceRelayRates (symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64) {
             let updaterRef = self.updaterCapability.borrow() 
                 ?? panic ("Can't borrow reference to data updater while processing request ".concat(requestID.toString()))
             updaterRef.forceUpdateData(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID, relayerID: self.uuid)
@@ -216,22 +235,25 @@ pub contract BandOracle {
 
     /// The resource that allows the maintainer account to charge a fee for the use of the oracle.
     ///
-    pub resource FeeCollector {
+    access(all) resource FeeCollector {
 
         /// Sets the fee in Flow tokens for the oracle use.
         ///
         /// @param fee: The amount of Flow tokens.
         ///
-        pub fun setFee (fee: UFix64) {
+        access(all) fun setFee (fee: UFix64) {
             BandOracle.setFee(fee: fee)
+            emit FeeUpdated(old: BandOracle.fee, new: fee)
         }
 
         /// Extracts the fees from the contract's vault.
         /// 
         /// @return A vault containing the funds obtained for the oracle use.
         ///
-        pub fun collectFees (): @FungibleToken.Vault {
-            return <- BandOracle.collectFees()
+        access(all) fun collectFees (receiver: &{FungibleToken.Receiver}) {
+            let fees <- BandOracle.collectFees()
+            emit FeesCollected(amount: fees.balance, to: receiver.owner?.address, collectorUUID: self.uuid, collectorAddress: self.owner!.address)
+            receiver.deposit(from: <-fees)
         }
 
     }
@@ -330,8 +352,8 @@ pub contract BandOracle {
     ///
     /// @return A flow token vault with the collected fees so far.
     ///
-    access(contract) fun collectFees (): @FungibleToken.Vault {
-        let collectedFees <- FlowToken.createEmptyVault()
+    access(contract) fun collectFees (): @{FungibleToken.Vault} {
+        let collectedFees <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
         collectedFees.deposit(from: <- BandOracle.payments.withdraw(amount: BandOracle.payments.balance))
         return <- collectedFees
     }
@@ -344,7 +366,7 @@ pub contract BandOracle {
     /// @param updaterCapability: The capability pointing to the OracleAdmin resource needed to create the relay.
     /// @return The new relay resource.
     ///
-    pub fun createRelay (updaterCapability: Capability<&{DataUpdater}>): @Relay {
+    access(all) fun createRelay (updaterCapability: Capability<&{DataUpdater}>): @Relay {
         return <- create Relay(updaterCapability: updaterCapability)
     }
 
@@ -355,11 +377,11 @@ pub contract BandOracle {
     /// @param relayer: Address of the account who will be granted with a relayer.
     /// @return The capability name.
     ///
-    pub fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
+    access(all) view fun getUpdaterCapabilityNameFromAddress (relayer: Address): String {
         // Create the string that will form the private path concatenating the base
         // path and the relayer identifying address.
         let capabilityName = 
-            BandOracle.dataUpdaterPrivateBasePath.concat(relayer.toString())
+            BandOracle.dataUpdaterBasePath.concat(relayer.toString())
         return capabilityName
     }
 
@@ -367,7 +389,7 @@ pub contract BandOracle {
     ///
     /// @return The fee to be charged for every request made to the oracle.
     ///
-    pub fun getFee (): UFix64 {
+    access(all) view fun getFee (): UFix64 {
         return BandOracle.fee
     }
 
@@ -378,16 +400,18 @@ pub contract BandOracle {
     /// @param payment: Flow token vault containing the service fee.
     /// @return The `ReferenceData` containing the requested data.
     ///
-    pub fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @FungibleToken.Vault): ReferenceData {
+    access(all) fun getReferenceData (baseSymbol: String, quoteSymbol: String, payment: @{FungibleToken.Vault}): ReferenceData {
         pre {
-            BandOracle._getRefData(symbol: baseSymbol) != nil: "No quotes for base symbol"
-            BandOracle._getRefData(symbol: quoteSymbol) != nil: "No quotes for base symbol"
             payment.balance >= BandOracle.fee : "Insufficient balance"
         }
-        let baseRefData = BandOracle._getRefData(symbol: baseSymbol)!
-        let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
-        BandOracle.payments.deposit(from: <- payment)
-        return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
+        if (BandOracle._getRefData(symbol: baseSymbol) != nil && BandOracle._getRefData(symbol: quoteSymbol) != nil){
+            let baseRefData = BandOracle._getRefData(symbol: baseSymbol)!
+            let quoteRefData = BandOracle._getRefData(symbol: quoteSymbol)!
+            BandOracle.payments.deposit(from: <- payment)
+            return BandOracle.calculateReferenceData (baseRefData: baseRefData, quoteRefData: quoteRefData)
+        } else {
+            panic("Cannot get a quote for the requested symbol pair.")
+        }
     }
 
     /// Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
@@ -397,7 +421,7 @@ pub contract BandOracle {
     /// @param rate: The symbol rate as an integer.
     /// @return The symbol rate as a decimal.
     ///
-    pub fun e18ToFixedPoint (rate: UInt256): UFix64 {
+    access(all) view fun e18ToFixedPoint (rate: UInt256): UFix64 {
         return  (
                     UFix64(
                         rate / BandOracle.e18
@@ -419,15 +443,13 @@ pub contract BandOracle {
 
     init() {
         self.OracleAdminStoragePath = /storage/BandOracleAdmin
-        self.OracleAdminPrivatePath = /private/BandOracleAdmin
         self.RelayStoragePath = /storage/BandOracleRelay
-        self.RelayPrivatePath = /private/BandOracleRelay
         self.FeeCollectorStoragePath = /storage/BandOracleFeeCollector
-        self.dataUpdaterPrivateBasePath = "BandOracleDataUpdater"
-        self.account.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
-        self.account.link<&{OracleAdmin}>(self.OracleAdminPrivatePath, target: self.OracleAdminStoragePath)
+        self.dataUpdaterBasePath = "BandOracleDataUpdater_"
+        self.account.storage.save(<- create BandOracleAdmin(), to: self.OracleAdminStoragePath)
         self.symbolsRefData = {}
-        self.payments <- FlowToken.createEmptyVault()
+        self.relayersCapabilityID = {}
+        self.payments <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
         self.fee = 0.0
         self.e18 = 1_000_000_000_000_000_000
         self.e9 = 1_000_000_000
@@ -435,14 +457,10 @@ pub contract BandOracle {
         // The admin could decide to build a transaction borrowing the whole BandOracleAdmin
         // resource and call updateData methods bypassing relayData methods but we are explicitly
         // discouraging that by giving the admin a regular relay resource on contract deployment.
-        let oracleAdminRef = self.account.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
+        let oracleAdminRef = self.account.storage.borrow<&{OracleAdmin}>(from: BandOracle.OracleAdminStoragePath)
             ?? panic("Can't borrow a reference to the Oracle Admin")
-        let dataUpdaterPrivatePath = oracleAdminRef.getUpdaterCapabilityPathFromAddress(relayer: self.account.address)
-        self.account.link<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath, target: BandOracle.OracleAdminStoragePath)
-            ?? panic ("Data Updater capability for admin creation failed")
-        let updaterCapability = self.account.getCapability<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
+        let updaterCapability = self.account.capabilities.storage.issue<&{BandOracle.DataUpdater}>(BandOracle.OracleAdminStoragePath)
         let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
-        self.account.save(<- relayer, to: BandOracle.RelayStoragePath)
-        self.account.link<&BandOracle.Relay>(BandOracle.RelayPrivatePath, target: BandOracle.RelayStoragePath)
+        self.account.storage.save(<- relayer, to: BandOracle.RelayStoragePath)
     }
 }

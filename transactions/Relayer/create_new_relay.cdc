@@ -1,7 +1,7 @@
 import "BandOracle"
 
 transaction (oracleAdmin: Address) {
-    prepare (acct: AuthAccount){
+    prepare (acct: auth(SaveValue, ClaimInboxCapability)&Account){
         // Try to claim the published updater capability 
         let updaterCapability = 
             acct.inbox.claim<&{BandOracle.DataUpdater}>(
@@ -14,8 +14,6 @@ transaction (oracleAdmin: Address) {
         // an account that has been able to claim a updater capability could execute it successfully
         let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
         // Save the new relayer resource into the relayer account
-        acct.save(<- relayer, to: BandOracle.RelayStoragePath)
-        // Link the relayer resource to a private path for using it latter
-        acct.link<&BandOracle.Relay>(BandOracle.RelayPrivatePath, target: BandOracle.RelayStoragePath)
+        acct.storage.save(<- relayer, to: BandOracle.RelayStoragePath)
     }
 }

@@ -4,16 +4,14 @@ import "FungibleToken"
 
 transaction (baseSymbol: String, quoteSymbol: String) {
     
-    let payment: @FungibleToken.Vault
+    let payment: @{FungibleToken.Vault}
 
-    prepare (acct: AuthAccount){
+    prepare (acct: auth(BorrowValue)&Account){
 
-        let vault <- acct.load<@FlowToken.Vault>(from: /storage/flowTokenVault) ??
-            panic("Cannot load account flow vault")
+        let vaultRef = acct.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(from: /storage/flowTokenVault) ??
+            panic("Cannot borrow reference to signer's FLOW vault")
         
-        self.payment <- vault.withdraw(amount: BandOracle.getFee())
-        
-        acct.save(<- vault, to: /storage/flowTokenVault)
+        self.payment <- vaultRef.withdraw(amount: BandOracle.getFee())
 
     }
 
