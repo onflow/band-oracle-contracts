@@ -131,7 +131,6 @@ access(all) contract BandOracle {
         /// NOTE: Does not revoke the underlying Capability - this must be done in a separate call from the issuing account
         ///
         /// @param relayer: The entitled relayer account address
-        /// @return: The ID of the data updater capability along with the relayer address
         ///
         access(all) fun removeRelayerCapabilityID (relayer: Address) {
             BandOracle.relayersCapabilityID.remove(key: relayer)
