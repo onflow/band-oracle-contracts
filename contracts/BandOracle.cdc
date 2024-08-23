@@ -50,6 +50,12 @@ access(all) contract BandOracle {
     // Emitted when a symbol is removed from the oracle.
     access(all) event BandOracleSymbolRemoved(symbol: String)
 
+    // Emitted when fees are collected.
+    access(all) event FeesCollected(amount: UFix64, to: Address?, collectorUUID: UInt64, collectorAddress: Address)
+
+    // Emitted when fees are updated.
+    access(all) event FeeUpdated(old: UFix64, new: UFix64)
+
 
     /// Structs
     
@@ -237,13 +243,14 @@ access(all) contract BandOracle {
         ///
         access(all) fun setFee (fee: UFix64) {
             BandOracle.setFee(fee: fee)
+            emit FeeUpdated(old: BandOracle.fee, new: fee)
         }
 
         /// Extracts the fees from the contract's vault.
         /// 
         /// @return A vault containing the funds obtained for the oracle use.
         ///
-        access(all) fun collectFees (receiver: &{FungibleToken.Receiver}): @{FungibleToken.Vault} {
+        access(all) fun collectFees (receiver: &{FungibleToken.Receiver}) {
             let fees <- BandOracle.collectFees()
             emit FeesCollected(amount: fees.balance, to: receiver.owner?.address, collectorUUID: self.uuid, collectorAddress: self.owner!.address)
             receiver.deposit(from: <-fees)
