@@ -97,7 +97,7 @@ access(all) contract BandOracle {
     ///
     access(all) resource interface OracleAdmin {
         access(all) fun setRelayerCapabilityID (relayer: Address, capabilityID: UInt64)
-        access(all) fun revokeRelayer (relayer: Address)
+        access(all) fun removeRelayerCapabilityID (relayer: Address)
         access(all) fun getUpdaterCapabilityIDFromAddress (relayer: Address): UInt64?
         access(all) fun removeSymbol (symbol: String)
         access(all) fun createNewFeeCollector (): @BandOracle.FeeCollector
@@ -133,7 +133,7 @@ access(all) contract BandOracle {
         /// @param relayer: The entitled relayer account address
         /// @return: The ID of the data updater capability along with the relayer address
         ///
-        access(all) fun revokeRelayer (relayer: Address) {
+        access(all) fun removeRelayerCapabilityID (relayer: Address) {
             BandOracle.relayersCapabilityID.remove(key: relayer)
         }
 
