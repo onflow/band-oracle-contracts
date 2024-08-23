@@ -127,7 +127,8 @@ access(all) contract BandOracle {
             BandOracle.relayersCapabilityID[relayer] = capabilityID
         }
 
-        /// Deletes a relayer's data updater capability from the contract storage
+        /// Deletes a relayer's CapabilityID from `BandOracle.relayersCapabilityID` mapping for traceability purposes
+        /// NOTE: Does not revoke the underlying Capability - this must be done in a separate call from the issuing account
         ///
         /// @param relayer: The entitled relayer account address
         /// @return: The ID of the data updater capability along with the relayer address
