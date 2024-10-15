@@ -7,8 +7,8 @@ To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
 |Name|Testnet|Mainnet|
 |----|-------|-------|
-|[BandOracle](contracts/BandOracle.cdc)|[0x4772ee0aba864de9](https://contractbrowser.com/A.4772ee0aba864de9.BandOracle)|[]()|
-|[BandOracle](contracts/BandOracle.cdc)|[]()|[0xdd2792e4d9c851f2](https://contractbrowser.com/A.dd2792e4d9c851f2.BandOracle)|
+|[BandOracle](contracts/BandOracle.cdc)|[0x2c71de7af78d1adf](https://contractbrowser.com/A.2c71de7af78d1adf.BandOracle)|[]()|
+|[BandOracle](contracts/BandOracle.cdc)|[]()|[0x6801a6222ebf784a](https://contractbrowser.com/A.6801a6222ebf784a.BandOracle)|
 
 ## How it works?
 The contract keeps a record of symbols and the corresponding financial price data for them. While financial data are only updated by authorized BandChain relayers, they can be queried via a script by any user or application on the Flow blockchain.
