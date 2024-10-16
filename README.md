@@ -1,5 +1,5 @@
 # Band Oracle Contract
-The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network offers ~100 cryptocurrency [price quotes](https://data.bandprotocol.com/) available to any Cadence applications, contracts or transactions.  
+The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network presently offers 5 cryptocurrency [price quotes](https://data.bandprotocol.com/) available to any Cadence applications, contracts or transactions. Currencies supported are: ETH, FLOW, USDC, USDT, WBTC.
 
 To learn more about Band Protocol please refer to: https://faq.bandprotocol.com/
 
