@@ -1,5 +1,5 @@
 # Band Oracle Contract
-The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network presently offers the full set of [price quotes](https://data.bandprotocol.com/) from teh Band Standard Dataset. These are available for any Cadence applications, contracts or transactions to use and presently charges no fees. 
+The Cadence smart contract enabling integration of the Band Protocol Oracle network. The oracle network presently offers the full set of [price quotes](https://data.bandprotocol.com/) from the Band Standard Dataset. These are available for any Cadence applications, contracts or transactions to use and presently charges no fees. 
 
 Currently supported cryptocurrency token pairs are: 
 
