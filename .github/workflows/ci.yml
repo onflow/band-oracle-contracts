@@ -3,19 +3,24 @@
 name: Run CLI Commands on PR
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
-    types: [opened, synchronize]
+    branches:
+      - main
 
 jobs:
-  run-commands:
+  tests:
+    name: Flow CLI Tests
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
         with:
-          go-version: "1.22"
-      - uses: actions/cache@v1
+          go-version: "1.23.x"
+      - uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -24,8 +29,10 @@ jobs:
       - name: Install Flow CLI
         run: sh -ci "$(curl -fsSL https://raw.githubusercontent.com/onflow/flow-cli/master/install.sh)"
       - name: Flow CLI Version
-        run: flow-c1 version
+        run: flow version
       - name: Update PATH
         run: echo "/root/.local/bin" >> $GITHUB_PATH
+      - name: Install dependencies
+        run: flow deps install --skip-alias --skip-deployments
       - name: Run tests
-        run: flow-c1 test test/band_oracle_tests.cdc
+        run: flow test --cover --covercode="contracts" --coverprofile="coverage.lcov" ./test/*_tests.cdc
