@@ -5,7 +5,7 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"testing": "0000000000000006",
-				"testnet": "4772ee0aba864de9"
+				"testnet": "9fb6606c300b5051"
 			}
 		}
 	},
@@ -99,7 +99,7 @@
 			"key": "2b42bf501bb3e07e9332b0cda9e68c18d0591cdc54aa701fb111991adf1a99fe"
 		},
 		"testnet-oracle": {
-			"address": "4772ee0aba864de9",
+			"address": "9fb6606c300b5051",
 			"key": {
 				"type": "file",
 				"location": "testnet-oracle.pkey"
