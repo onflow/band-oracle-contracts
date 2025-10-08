@@ -1,7 +1,7 @@
 # Resource `FeeCollector`
 
 ```cadence
-pub resource FeeCollector {
+access(all) resource FeeCollector {
 }
 ```
 
@@ -11,7 +11,7 @@ The resource that allows the maintainer account to charge a fee for the use of t
 ### `setFee()`
 
 ```cadence
-fun setFee(fee: UFix64)
+access(all) fun setFee(fee: UFix64)
 ```
 Sets the fee in Flow tokens for the oracle use.
 
@@ -23,7 +23,7 @@ Parameters:
 ### `collectFees()`
 
 ```cadence
-fun collectFees(): FungibleToken.Vault
+access(all) fun collectFees(): FungibleToken.Vault
 ```
 Extracts the fees from the contract's vault.
 

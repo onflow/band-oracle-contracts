@@ -1,25 +1,25 @@
 # Contract `BandOracle`
 
 ```cadence
-pub contract BandOracle {
+access(all) contract BandOracle {
 
-    pub let OracleAdminStoragePath: StoragePath
+    access(all) let OracleAdminStoragePath: StoragePath
 
-    pub let OracleAdminPrivatePath: PrivatePath
+    access(all) let OracleAdminPrivatePath: PrivatePath
 
-    pub let RelayStoragePath: StoragePath
+    access(all) let RelayStoragePath: StoragePath
 
-    pub let RelayPrivatePath: PrivatePath
+    access(all) let RelayPrivatePath: PrivatePath
 
-    pub let FeeCollectorStoragePath: StoragePath
+    access(all) let FeeCollectorStoragePath: StoragePath
 
     access(contract) let dataUpdaterPrivateBasePath: String
 
     access(contract) let symbolsRefData: {String: RefData}
 
-    pub let e18: UInt256
+    access(all) let e18: UInt256
 
-    pub let e9: UInt256
+    access(all) let e9: UInt256
 
     access(contract) let payments: FungibleToken.Vault
 
@@ -34,7 +34,7 @@ https://docs.bandchain.org/
 ### `OracleAdmin`
 
 ```cadence
-pub resource interface OracleAdmin {
+access(all) resource interface OracleAdmin {
 }
 ```
 Resources
@@ -47,7 +47,7 @@ Admin only operations.
 ### `DataUpdater`
 
 ```cadence
-pub resource interface DataUpdater {
+access(all) resource interface DataUpdater {
 }
 ```
 Relayer operations.
@@ -60,13 +60,13 @@ Relayer operations.
 ### `RefData`
 
 ```cadence
-pub struct RefData {
+access(all) struct RefData {
 
-    pub var rate: UInt64
+    access(all) var rate: UInt64
 
-    pub var timestamp: UInt64
+    access(all) var timestamp: UInt64
 
-    pub var requestID: UInt64
+    access(all) var requestID: UInt64
 }
 ```
 Structs
@@ -79,15 +79,15 @@ Structure for storing any symbol USD-rate.
 ### `ReferenceData`
 
 ```cadence
-pub struct ReferenceData {
+access(all) struct ReferenceData {
 
-    pub var integerE18Rate: UInt256
+    access(all) var integerE18Rate: UInt256
 
-    pub var fixedPointRate: UFix64
+    access(all) var fixedPointRate: UFix64
 
-    pub var baseTimestamp: UInt64
+    access(all) var baseTimestamp: UInt64
 
-    pub var quoteTimestamp: UInt64
+    access(all) var quoteTimestamp: UInt64
 }
 ```
 Structure for consuming data as quote / base symbols.
@@ -99,7 +99,7 @@ Structure for consuming data as quote / base symbols.
 ### `BandOracleAdmin`
 
 ```cadence
-pub resource BandOracleAdmin {
+access(all) resource BandOracleAdmin {
 }
 ```
 The `BandOracleAdmin` will be created on the contract deployment, and will allow
@@ -112,7 +112,7 @@ the own admin to manage the oracle and the relayers to update prices on it.
 ### `Relay`
 
 ```cadence
-pub resource Relay {
+access(all) resource Relay {
 
     priv let updaterCapability: Capability<&{DataUpdater}>
 }
@@ -126,7 +126,7 @@ The resource that will allow an account to make quote updates
 ### `FeeCollector`
 
 ```cadence
-pub resource FeeCollector {
+access(all) resource FeeCollector {
 }
 ```
 The resource that allows the maintainer account to charge a fee for the use of the oracle.
@@ -139,7 +139,12 @@ The resource that allows the maintainer account to charge a fee for the use of t
 ### `updateRefData()`
 
 ```cadence
-fun updateRefData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
+access(contract) fun updateRefData(
+  symbolsRates: {String: UInt64},
+  resolveTime: UInt64,
+  requestID: UInt64,
+  relayerID: UInt64
+)
 ```
 Functions
 Aux access(contract) functions
@@ -156,7 +161,12 @@ Parameters:
 ### `forceUpdateRefData()`
 
 ```cadence
-fun forceUpdateRefData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
+access(contract) fun forceUpdateRefData(
+  symbolsRates: {String: UInt64},
+  resolveTime: UInt64,
+  requestID: UInt64,
+  relayerID: UInt64
+)
 ```
 Auxiliary private function for the `OracleAdmin` to force update the rates.
 
@@ -171,7 +181,7 @@ Parameters:
 ### `removeSymbol()`
 
 ```cadence
-fun removeSymbol(symbol: String)
+access(contract) fun removeSymbol(symbol: String)
 ```
 Auxiliary private function for removing a stored symbol
 
@@ -183,7 +193,7 @@ Parameters:
 ### `_getRefData()`
 
 ```cadence
-fun _getRefData(symbol: String): RefData?
+access(contract) fun _getRefData(symbol: String): RefData?
 ```
 Auxiliary private function for checking and retrieving data for a given symbol.
 
@@ -197,7 +207,7 @@ Returns: Optional `RefData` struct if there is any quote stored for the requeste
 ### `calculateReferenceData()`
 
 ```cadence
-fun calculateReferenceData(baseRefData: RefData, quoteRefData: RefData): ReferenceData
+access(contract) fun calculateReferenceData(baseRefData: RefData, quoteRefData: RefData): ReferenceData
 ```
 Private function that calculates the reference data between two base and quote symbols.
 
@@ -224,7 +234,7 @@ Parameters:
 ### `collectFees()`
 
 ```cadence
-fun collectFees(): FungibleToken.Vault
+access(all) fun collectFees(): FungibleToken.Vault
 ```
 Private method for the `FeeCollector` to be able to collect the fees from the contract vault.
 
@@ -235,7 +245,7 @@ Returns: A flow token vault with the collected fees so far.
 ### `createRelay()`
 
 ```cadence
-fun createRelay(updaterCapability: Capability<&{DataUpdater}>): Relay
+access(all) fun createRelay(updaterCapability: Capability<&{DataUpdater}>): Relay
 ```
 Public access functions.
 Public method for creating a relay and become a relayer.
@@ -250,7 +260,7 @@ Returns: The new relay resource.
 ### `getUpdaterCapabilityNameFromAddress()`
 
 ```cadence
-fun getUpdaterCapabilityNameFromAddress(relayer: Address): String
+access(all) view fun getUpdaterCapabilityNameFromAddress(relayer: Address): String
 ```
 Auxiliary method to ensure that the formation of the capability name that
 identifies data updater capability for relayers is done in a uniform way
@@ -277,7 +287,11 @@ Returns: The fee to be charged for every request made to the oracle.
 ### `getReferenceData()`
 
 ```cadence
-fun getReferenceData(baseSymbol: String, quoteSymbol: String, payment: FungibleToken.Vault): ReferenceData
+access(all) fun getReferenceData(
+  baseSymbol: String,
+  quoteSymbol: String,
+  payment: FungibleToken.Vault
+): ReferenceData
 ```
 The entry point for consumers to query the oracle in exchange of a fee.
 
@@ -293,7 +307,7 @@ Returns: The `ReferenceData` containing the requested data.
 ### `e18ToFixedPoint()`
 
 ```cadence
-fun e18ToFixedPoint(rate: UInt256): UFix64
+access(all) view fun e18ToFixedPoint(rate: UInt256): UFix64
 ```
 Turn scientific notation numbers as `UInt256` multiplied by e8 into `UFix64`
 fixed point numbers. Exceptionally large integer rates may lose some precision
@@ -310,7 +324,11 @@ Returns: The symbol rate as a decimal.
 ### `BandOracleSymbolsUpdated`
 
 ```cadence
-pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, requestID: UInt64)
+access(all) event BandOracleSymbolsUpdated(
+  symbols: [String],
+  relayerID: UInt64,
+  requestID: UInt64
+)
 ```
 
 ---
@@ -318,7 +336,7 @@ pub event BandOracleSymbolsUpdated(symbols: [String], relayerID: UInt64, request
 ### `BandOracleSymbolRemoved`
 
 ```cadence
-pub event BandOracleSymbolRemoved(symbol: String)
+access(all) event BandOracleSymbolRemoved(symbol: String)
 ```
 
 ---

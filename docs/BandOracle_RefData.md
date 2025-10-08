@@ -1,13 +1,13 @@
 # Struct `RefData`
 
 ```cadence
-pub struct RefData {
+access(all) struct RefData {
 
-    pub var rate: UInt64
+    access(all) var rate: UInt64
 
-    pub var timestamp: UInt64
+    access(all) var timestamp: UInt64
 
-    pub var requestID: UInt64
+    access(all) var requestID: UInt64
 }
 ```
 

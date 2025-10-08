@@ -1,7 +1,7 @@
 # Resource Interface `OracleAdmin`
 
 ```cadence
-pub resource interface OracleAdmin {
+access(all) resource interface OracleAdmin {
 }
 ```
 
@@ -9,10 +9,26 @@ Resources
 Admin only operations.
 ## Functions
 
-### `getUpdaterCapabilityPathFromAddress()`
+### `setRelayerCapabilityID()`
 
 ```cadence
-fun getUpdaterCapabilityPathFromAddress(relayer: Address): PrivatePath
+access(all) fun setRelayerCapabilityID(relayer: Address, capabilityID: UInt64)
+```
+
+---
+
+### `removeRelayerCapabilityID()`
+
+```cadence
+access(all) fun removeRelayerCapabilityID(relayer: Address)
+```
+
+---
+
+### `getUpdaterCapabilityIDFromAddress()`
+
+```cadence
+access(all) fun getUpdaterCapabilityIDFromAddress(relayer: Address): UInt64?
 ```
 
 ---
@@ -20,7 +36,7 @@ fun getUpdaterCapabilityPathFromAddress(relayer: Address): PrivatePath
 ### `removeSymbol()`
 
 ```cadence
-fun removeSymbol(symbol: String)
+access(all) fun removeSymbol(symbol: String)
 ```
 
 ---
@@ -28,7 +44,7 @@ fun removeSymbol(symbol: String)
 ### `createNewFeeCollector()`
 
 ```cadence
-fun createNewFeeCollector(): BandOracle.FeeCollector
+access(all) fun createNewFeeCollector(): BandOracle.FeeCollector
 ```
 
 ---

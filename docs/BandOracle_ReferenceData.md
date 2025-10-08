@@ -1,15 +1,15 @@
 # Struct `ReferenceData`
 
 ```cadence
-pub struct ReferenceData {
+access(all) struct ReferenceData {
 
-    pub var integerE18Rate: UInt256
+    access(all) var integerE18Rate: UInt256
 
-    pub var fixedPointRate: UFix64
+    access(all) var fixedPointRate: UFix64
 
-    pub var baseTimestamp: UInt64
+    access(all) var baseTimestamp: UInt64
 
-    pub var quoteTimestamp: UInt64
+    access(all) var quoteTimestamp: UInt64
 }
 ```
 

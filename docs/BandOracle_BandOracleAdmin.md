@@ -1,7 +1,7 @@
 # Resource `BandOracleAdmin`
 
 ```cadence
-pub resource BandOracleAdmin {
+access(all) resource BandOracleAdmin {
 }
 ```
 
@@ -17,7 +17,7 @@ Implemented Interfaces:
 ### `getUpdaterCapabilityPathFromAddress()`
 
 ```cadence
-fun getUpdaterCapabilityPathFromAddress(relayer: Address): PrivatePath
+access(all) fun getUpdaterCapabilityPathFromAddress(relayer: Address): PrivatePath
 ```
 Auxiliary method to ensure that the formation of the capability path that
 identifies relayers is done in a uniform way.
@@ -30,7 +30,7 @@ Parameters:
 ### `removeSymbol()`
 
 ```cadence
-fun removeSymbol(symbol: String)
+access(all) fun removeSymbol(symbol: String)
 ```
 Removes a symbol and its quotes from the contract storage.
 
@@ -42,7 +42,7 @@ Parameters:
 ### `updateData()`
 
 ```cadence
-fun updateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
+access(all) fun updateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
 ```
 Relayers can call this method to update rates.
 
@@ -57,7 +57,7 @@ Parameters:
 ### `forceUpdateData()`
 
 ```cadence
-fun forceUpdateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
+access(all) fun forceUpdateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
 ```
 Relayers can call this method to force update rates.
 
@@ -72,7 +72,7 @@ Parameters:
 ### `createNewFeeCollector()`
 
 ```cadence
-fun createNewFeeCollector(): FeeCollector
+access(all) fun createNewFeeCollector(): FeeCollector
 ```
 Creates a fee collector, meant to be called once after contract deployment
 for storing the resource on the maintainer's account.
