@@ -290,7 +290,7 @@ Returns: The fee to be charged for every request made to the oracle.
 access(all) fun getReferenceData(
   baseSymbol: String,
   quoteSymbol: String,
-  payment: FungibleToken.Vault
+  payment: @{FungibleToken.Vault}
 ): ReferenceData
 ```
 The entry point for consumers to query the oracle in exchange of a fee.
