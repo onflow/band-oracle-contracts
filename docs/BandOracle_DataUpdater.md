@@ -1,7 +1,7 @@
 # Resource Interface `DataUpdater`
 
 ```cadence
-pub resource interface DataUpdater {
+access(all) resource interface DataUpdater {
 }
 ```
 
@@ -11,7 +11,12 @@ Relayer operations.
 ### `updateData()`
 
 ```cadence
-fun updateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
+access(all) fun updateData(
+    symbolsRates: {String: UInt64},
+    resolveTime: UInt64,
+    requestID: UInt64,
+    relayerID: UInt64
+)
 ```
 
 ---
@@ -19,7 +24,12 @@ fun updateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: U
 ### `forceUpdateData()`
 
 ```cadence
-fun forceUpdateData(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64)
+access(all) fun forceUpdateData(
+    symbolsRates: {String: UInt64},
+    resolveTime: UInt64,
+    requestID: UInt64,
+    relayerID: UInt64
+)
 ```
 
 ---

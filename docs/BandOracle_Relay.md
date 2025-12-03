@@ -1,7 +1,7 @@
 # Resource `Relay`
 
 ```cadence
-pub resource Relay {
+access(all) resource Relay {
 
     priv let updaterCapability: Capability<&{DataUpdater}>
 }
@@ -21,7 +21,7 @@ init(updaterCapability: Capability<&{DataUpdater}>)
 ### `relayRates()`
 
 ```cadence
-fun relayRates(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64)
+access(all) fun relayRates(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64)
 ```
 Relay updated rates to the Oracle Admin
 
@@ -35,7 +35,7 @@ Parameters:
 ### `forceRelayRates()`
 
 ```cadence
-fun forceRelayRates(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64)
+access(all) fun forceRelayRates(symbolsRates: {String: UInt64}, resolveTime: UInt64, requestID: UInt64)
 ```
 Relay updated rates to the Oracle Admin forcing the update of the symbols even if the `resolveTime` is older than the last update.
 

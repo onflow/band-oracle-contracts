@@ -14,6 +14,8 @@
 			"source": "testnet://9a0766d93b6608b7.Burner",
 			"hash": "71af18e227984cd434a3ad00bb2f3618b76482842bae920ee55662c37c8bf331",
 			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "f233dcee88fe0abe",
 				"testnet": "9a0766d93b6608b7"
 			}
 		},
@@ -23,47 +25,42 @@
 			"aliases": {
 				"emulator": "0ae53cb6e3f42a79",
 				"mainnet": "1654653399040a61",
-				"previewnet": "4445e7ad11568276",
 				"testnet": "7e60df042a9c0868"
 			}
 		},
 		"FungibleToken": {
 			"source": "testnet://9a0766d93b6608b7.FungibleToken",
-			"hash": "154d9000cc0b992664c1d315826a4bc47e744fbc7f2e99daf823e5101945042a",
+			"hash": "d84e41a86bd27806367b89c75a2a9570f7713480ab113cc214c4576466888958",
 			"aliases": {
 				"emulator": "ee82856bf20e2aa6",
 				"mainnet": "f233dcee88fe0abe",
-				"previewnet": "a0225e7000ac82a9",
 				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"FungibleTokenMetadataViews": {
 			"source": "testnet://9a0766d93b6608b7.FungibleTokenMetadataViews",
-			"hash": "64ec97395c0a3958510ea663563f59d5a6beb7943d69b903db94c11d76be6296",
+			"hash": "085d02742eb50e6200cf2a4ad4551857313513afa7205c1e85f5966547a56df3",
 			"aliases": {
 				"emulator": "ee82856bf20e2aa6",
 				"mainnet": "f233dcee88fe0abe",
-				"previewnet": "a0225e7000ac82a9",
 				"testnet": "9a0766d93b6608b7"
 			}
 		},
 		"MetadataViews": {
 			"source": "testnet://631e88ae7f1d7c20.MetadataViews",
-			"hash": "77e2c3c4afb855af657ecae6611a99acf47a102144c68f4663de42ae700adf5b",
+			"hash": "0b746cabba668c39de9dc47b94fc458f4119cbabb6883616e4a8750518310ccb",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"previewnet": "b6763b4399a888c8",
 				"testnet": "631e88ae7f1d7c20"
 			}
 		},
 		"NonFungibleToken": {
 			"source": "testnet://631e88ae7f1d7c20.NonFungibleToken",
-			"hash": "ea1b5fa55b6648064c77a6fd83084a3a0be2a6f4386b3b259c89e4f62ab8f6c0",
+			"hash": "ac40c5a3ec05884ae48cb52ebf680deebb21e8a0143cd7d9b1dc88b0f107e088",
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"previewnet": "b6763b4399a888c8",
 				"testnet": "631e88ae7f1d7c20"
 			}
 		},
@@ -73,7 +70,6 @@
 			"aliases": {
 				"emulator": "f8d6e0586b0a20c7",
 				"mainnet": "1d7e57aa55817448",
-				"previewnet": "b6763b4399a888c8",
 				"testnet": "631e88ae7f1d7c20"
 			}
 		}
